@@ -1,0 +1,72 @@
+Restore Archived Project report for Blink2
+Sun Nov 20 15:51:34 2016
+Quartus II 64-Bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. Restore Archived Project Summary
+  3. Restore Archived Project Messages
+  4. Files Restored
+  5. Files Not Restored
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 1991-2013 Altera Corporation
+Your use of Altera Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Altera Program License 
+Subscription Agreement, Altera MegaCore Function License 
+Agreement, or other applicable license agreement, including, 
+without limitation, that your use is for the sole purpose of 
+programming logic devices manufactured by Altera and sold by 
+Altera or its authorized distributors.  Please refer to the 
+applicable agreement for further details.
+
+
+
++-------------------------------------------------------------------------+
+; Restore Archived Project Summary                                        ;
++---------------------------------+---------------------------------------+
+; Restore Archived Project Status ; Successful - Sun Nov 20 15:51:34 2016 ;
+; Revision Name                   ; Blink2                                ;
+; Top-level Entity Name           ; Blink2                                ;
+; Family                          ; Cyclone II                            ;
++---------------------------------+---------------------------------------+
+
+
++-----------------------------------+
+; Restore Archived Project Messages ;
++-----------------------------------+
+Info: Successfully restored 'C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/Blink2/Blink2_tmp_archive.qar' into the 'C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/Counter1/' directory
+Info: Generated report 'Blink2.restore.rpt'
+
+
++---------------------------------------------------+
+; Files Restored                                    ;
++---------------------------------------------------+
+; File Name                                         ;
++---------------------------------------------------+
+; Blink2.bdf                                        ;
+; Blink2.qpf                                        ;
+; Blink2.qsf                                        ;
+; incremental_db/compiled_partitions/Blink2.db_info ;
+; assignment_defaults.qdf                           ;
++---------------------------------------------------+
+
+
++--------------------+
+; Files Not Restored ;
++--------------------+
+; File Name          ;
++--------------------+
+
+
