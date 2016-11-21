@@ -1,5 +1,5 @@
 Analysis & Synthesis report for Blink2
-Sun Nov 20 16:12:52 2016
+Sun Nov 20 20:09:13 2016
 Quartus II 64-Bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -14,11 +14,10 @@ Quartus II 64-Bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edit
   6. Analysis & Synthesis Resource Usage Summary
   7. Analysis & Synthesis Resource Utilization by Entity
   8. Analysis & Synthesis IP Cores Summary
-  9. Registers Removed During Synthesis
- 10. General Register Statistics
- 11. Parameter Settings for User Entity Instance: lpm_counter0:inst1|lpm_counter:LPM_COUNTER_component
- 12. Elapsed Time Per Partition
- 13. Analysis & Synthesis Messages
+  9. General Register Statistics
+ 10. Parameter Settings for User Entity Instance: lpm_counter0:inst1|lpm_counter:LPM_COUNTER_component
+ 11. Elapsed Time Per Partition
+ 12. Analysis & Synthesis Messages
 
 
 
@@ -44,15 +43,15 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Analysis & Synthesis Summary                                                         ;
 +------------------------------------+-------------------------------------------------+
-; Analysis & Synthesis Status        ; Successful - Sun Nov 20 16:12:52 2016           ;
+; Analysis & Synthesis Status        ; Successful - Sun Nov 20 20:09:13 2016           ;
 ; Quartus II 64-Bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
 ; Revision Name                      ; Blink2                                          ;
 ; Top-level Entity Name              ; Blink2                                          ;
 ; Family                             ; Cyclone II                                      ;
-; Total logic elements               ; 0                                               ;
-;     Total combinational functions  ; 0                                               ;
-;     Dedicated logic registers      ; 0                                               ;
-; Total registers                    ; 0                                               ;
+; Total logic elements               ; 5                                               ;
+;     Total combinational functions  ; 5                                               ;
+;     Dedicated logic registers      ; 4                                               ;
+; Total registers                    ; 4                                               ;
 ; Total pins                         ; 6                                               ;
 ; Total virtual pins                 ; 0                                               ;
 ; Total memory bits                  ; 0                                               ;
@@ -183,33 +182,41 @@ Parallel compilation was disabled, but you have multiple processors available. E
 +---------------------------------------------+-------+
 ; Resource                                    ; Usage ;
 +---------------------------------------------+-------+
+; Estimated Total logic elements              ; 5     ;
 ;                                             ;       ;
-; Total combinational functions               ; 0     ;
+; Total combinational functions               ; 5     ;
 ; Logic element usage by number of LUT inputs ;       ;
 ;     -- 4 input functions                    ; 0     ;
 ;     -- 3 input functions                    ; 0     ;
-;     -- <=2 input functions                  ; 0     ;
+;     -- <=2 input functions                  ; 5     ;
 ;                                             ;       ;
 ; Logic elements by mode                      ;       ;
-;     -- normal mode                          ; 0     ;
-;     -- arithmetic mode                      ; 0     ;
+;     -- normal mode                          ; 2     ;
+;     -- arithmetic mode                      ; 3     ;
 ;                                             ;       ;
-; Total registers                             ; 0     ;
-;     -- Dedicated logic registers            ; 0     ;
+; Total registers                             ; 4     ;
+;     -- Dedicated logic registers            ; 4     ;
 ;     -- I/O registers                        ; 0     ;
 ;                                             ;       ;
 ; I/O pins                                    ; 6     ;
 ; Embedded Multiplier 9-bit elements          ; 0     ;
+; Maximum fan-out node                        ; ~GND  ;
+; Maximum fan-out                             ; 4     ;
+; Total fan-out                               ; 27    ;
+; Average fan-out                             ; 1.80  ;
 +---------------------------------------------+-------+
 
 
-+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-; Analysis & Synthesis Resource Utilization by Entity                                                                                                                         ;
-+----------------------------+-------------------+--------------+-------------+--------------+---------+-----------+------+--------------+---------------------+--------------+
-; Compilation Hierarchy Node ; LC Combinationals ; LC Registers ; Memory Bits ; DSP Elements ; DSP 9x9 ; DSP 18x18 ; Pins ; Virtual Pins ; Full Hierarchy Name ; Library Name ;
-+----------------------------+-------------------+--------------+-------------+--------------+---------+-----------+------+--------------+---------------------+--------------+
-; |Blink2                    ; 0 (0)             ; 0 (0)        ; 0           ; 0            ; 0       ; 0         ; 6    ; 0            ; |Blink2             ; work         ;
-+----------------------------+-------------------+--------------+-------------+--------------+---------+-----------+------+--------------+---------------------+--------------+
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Resource Utilization by Entity                                                                                                                                                                                                         ;
++-------------------------------------------+-------------------+--------------+-------------+--------------+---------+-----------+------+--------------+--------------------------------------------------------------------------------------+--------------+
+; Compilation Hierarchy Node                ; LC Combinationals ; LC Registers ; Memory Bits ; DSP Elements ; DSP 9x9 ; DSP 18x18 ; Pins ; Virtual Pins ; Full Hierarchy Name                                                                  ; Library Name ;
++-------------------------------------------+-------------------+--------------+-------------+--------------+---------+-----------+------+--------------+--------------------------------------------------------------------------------------+--------------+
+; |Blink2                                   ; 5 (1)             ; 4 (0)        ; 0           ; 0            ; 0       ; 0         ; 6    ; 0            ; |Blink2                                                                              ; work         ;
+;    |lpm_counter0:inst1|                   ; 4 (0)             ; 4 (0)        ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |Blink2|lpm_counter0:inst1                                                           ; work         ;
+;       |lpm_counter:LPM_COUNTER_component| ; 4 (0)             ; 4 (0)        ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |Blink2|lpm_counter0:inst1|lpm_counter:LPM_COUNTER_component                         ; work         ;
+;          |cntr_c3i:auto_generated|        ; 4 (4)             ; 4 (4)        ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |Blink2|lpm_counter0:inst1|lpm_counter:LPM_COUNTER_component|cntr_c3i:auto_generated ; work         ;
++-------------------------------------------+-------------------+--------------+-------------+--------------+---------+-----------+------+--------------+--------------------------------------------------------------------------------------+--------------+
 Note: For table entries with two numbers listed, the numbers in parentheses indicate the number of resources of the given type used by the specific entity alone. The numbers listed outside of parentheses indicate the total resources of the given type used by the specific entity and all of its sub-entities in the hierarchy.
 
 
@@ -222,24 +229,14 @@ Note: For table entries with two numbers listed, the numbers in parentheses indi
 +--------+--------------+---------+--------------+--------------+----------------------------+------------------------------------------------------------------------------------------+
 
 
-+----------------------------------------------------------------------------------------------------------------+
-; Registers Removed During Synthesis                                                                             ;
-+-------------------------------------------------------------------------------------------+--------------------+
-; Register name                                                                             ; Reason for Removal ;
-+-------------------------------------------------------------------------------------------+--------------------+
-; lpm_counter0:inst1|lpm_counter:LPM_COUNTER_component|cntr_c3i:auto_generated|safe_q[0..3] ; Lost fanout        ;
-; Total Number of Removed Registers = 4                                                     ;                    ;
-+-------------------------------------------------------------------------------------------+--------------------+
-
-
 +------------------------------------------------------+
 ; General Register Statistics                          ;
 +----------------------------------------------+-------+
 ; Statistic                                    ; Value ;
 +----------------------------------------------+-------+
-; Total registers                              ; 0     ;
+; Total registers                              ; 4     ;
 ; Number of registers using Synchronous Clear  ; 0     ;
-; Number of registers using Synchronous Load   ; 0     ;
+; Number of registers using Synchronous Load   ; 4     ;
 ; Number of registers using Asynchronous Clear ; 0     ;
 ; Number of registers using Asynchronous Load  ; 0     ;
 ; Number of registers using Clock Enable       ; 0     ;
@@ -289,7 +286,7 @@ Note: In order to hide this table in the UI and the text report file, please set
 Info: *******************************************************************
 Info: Running Quartus II 64-Bit Analysis & Synthesis
     Info: Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
-    Info: Processing started: Sun Nov 20 16:12:49 2016
+    Info: Processing started: Sun Nov 20 20:09:08 2016
 Info: Command: quartus_map --read_settings_files=on --write_settings_files=off Counter1 -c Blink2
 Warning (20028): Parallel compilation is not licensed and has been disabled
 Info (12021): Found 1 design units, including 1 entities, in source file blink2.bdf
@@ -298,10 +295,6 @@ Info (12021): Found 2 design units, including 1 entities, in source file lpm_cou
     Info (12022): Found design unit 1: lpm_counter0-SYN
     Info (12023): Found entity 1: lpm_counter0
 Info (12127): Elaborating entity "Blink2" for the top level hierarchy
-Warning (275043): Pin "D2" is missing source
-Warning (275043): Pin "D4" is missing source
-Warning (275043): Pin "D5" is missing source
-Warning (275043): Pin "P31" is missing source
 Info (12128): Elaborating entity "lpm_counter0" for hierarchy "lpm_counter0:inst1"
 Info (12128): Elaborating entity "lpm_counter" for hierarchy "lpm_counter0:inst1|lpm_counter:LPM_COUNTER_component"
 Info (12130): Elaborated megafunction instantiation "lpm_counter0:inst1|lpm_counter:LPM_COUNTER_component"
@@ -313,24 +306,16 @@ Info (12133): Instantiated megafunction "lpm_counter0:inst1|lpm_counter:LPM_COUN
 Info (12021): Found 1 design units, including 1 entities, in source file db/cntr_c3i.tdf
     Info (12023): Found entity 1: cntr_c3i
 Info (12128): Elaborating entity "cntr_c3i" for hierarchy "lpm_counter0:inst1|lpm_counter:LPM_COUNTER_component|cntr_c3i:auto_generated"
-Warning (13024): Output pins are stuck at VCC or GND
-    Warning (13410): Pin "D2" is stuck at GND
-    Warning (13410): Pin "D4" is stuck at GND
-    Warning (13410): Pin "D5" is stuck at GND
-    Warning (13410): Pin "P31" is stuck at GND
-Info (17049): 4 registers lost all their fanouts during netlist optimizations.
 Info (16010): Generating hard_block partition "hard_block:auto_generated_inst"
     Info (16011): Adding 0 node(s), including 0 DDIO, 0 PLL, 0 transceiver and 0 LCELL
-Warning (21074): Design contains 2 input pin(s) that do not drive logic
-    Warning (15610): No output dependent on input pin "Button"
-    Warning (15610): No output dependent on input pin "Clock"
-Info (21057): Implemented 6 device resources after synthesis - the final resource count might be different
+Info (21057): Implemented 11 device resources after synthesis - the final resource count might be different
     Info (21058): Implemented 2 input pins
     Info (21059): Implemented 4 output pins
-Info: Quartus II 64-Bit Analysis & Synthesis was successful. 0 errors, 13 warnings
-    Info: Peak virtual memory: 519 megabytes
-    Info: Processing ended: Sun Nov 20 16:12:52 2016
-    Info: Elapsed time: 00:00:03
+    Info (21061): Implemented 5 logic cells
+Info: Quartus II 64-Bit Analysis & Synthesis was successful. 0 errors, 1 warning
+    Info: Peak virtual memory: 520 megabytes
+    Info: Processing ended: Sun Nov 20 20:09:13 2016
+    Info: Elapsed time: 00:00:05
     Info: Total CPU time (on all processors): 00:00:02
 
 

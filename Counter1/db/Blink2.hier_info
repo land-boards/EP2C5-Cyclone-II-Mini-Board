@@ -1,10 +1,10 @@
 |Blink2
-D2 <= <GND>
-D4 <= <GND>
-D5 <= <GND>
-P31 <= <GND>
-Button => lpm_counter0:inst1.sclr
+D2 <= q[3].DB_MAX_OUTPUT_PORT_TYPE
+Button => inst.IN0
 Clock => lpm_counter0:inst1.clock
+D4 <= q[2].DB_MAX_OUTPUT_PORT_TYPE
+D5 <= q[0].DB_MAX_OUTPUT_PORT_TYPE
+P31 <= q[1].DB_MAX_OUTPUT_PORT_TYPE
 
 
 |Blink2|lpm_counter0:inst1

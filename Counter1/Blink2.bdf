@@ -21,7 +21,7 @@ applicable agreement for further details.
 (header "graphic" (version "1.4"))
 (pin
 	(input)
-	(rect 32 392 200 408)
+	(rect -24 392 144 408)
 	(text "INPUT" (rect 125 0 153 10)(font "Arial" (font_size 6)))
 	(text "Button" (rect 5 0 36 12)(font "Arial" ))
 	(pt 168 8)
@@ -34,13 +34,13 @@ applicable agreement for further details.
 		(line (pt 109 12)(pt 113 8))
 	)
 	(text "VCC" (rect 128 7 148 17)(font "Arial" (font_size 6)))
-	(annotation_block (location)(rect -16 392 32 408))
+	(annotation_block (location)(rect -72 392 -24 408))
 )
 (pin
 	(input)
-	(rect 32 424 200 440)
+	(rect -24 424 144 440)
 	(text "INPUT" (rect 125 0 153 10)(font "Arial" (font_size 6)))
-	(text "Clock" (rect 5 0 34 12)(font "Arial" ))
+	(text "Clock" (rect 5 0 33 12)(font "Arial" ))
 	(pt 168 8)
 	(drawing
 		(line (pt 84 12)(pt 109 12))
@@ -51,7 +51,7 @@ applicable agreement for further details.
 		(line (pt 109 12)(pt 113 8))
 	)
 	(text "VCC" (rect 128 7 148 17)(font "Arial" (font_size 6)))
-	(annotation_block (location)(rect -16 424 32 440))
+	(annotation_block (location)(rect -72 424 -24 440))
 )
 (pin
 	(output)
@@ -164,10 +164,30 @@ applicable agreement for further details.
 		(line (pt 0 0)(pt 0 0))
 	)
 )
-(connector
-	(pt 376 424)
-	(pt 408 424)
-	(bus)
+(symbol
+	(rect 168 384 216 416)
+	(text "NOT" (rect 1 0 21 10)(font "Arial" (font_size 6)))
+	(text "inst" (rect 3 21 20 33)(font "Arial" ))
+	(port
+		(pt 0 16)
+		(input)
+		(text "IN" (rect 2 7 13 19)(font "Courier New" (bold))(invisible))
+		(text "IN" (rect 2 7 13 19)(font "Courier New" (bold))(invisible))
+		(line (pt 0 16)(pt 13 16))
+	)
+	(port
+		(pt 48 16)
+		(output)
+		(text "OUT" (rect 32 7 49 19)(font "Courier New" (bold))(invisible))
+		(text "OUT" (rect 32 7 49 19)(font "Courier New" (bold))(invisible))
+		(line (pt 39 16)(pt 48 16))
+	)
+	(drawing
+		(line (pt 13 25)(pt 13 7))
+		(line (pt 13 7)(pt 31 16))
+		(line (pt 13 25)(pt 31 16))
+		(circle (rect 31 12 39 20))
+	)
 )
 (connector
 	(pt 408 304)
@@ -195,29 +215,43 @@ applicable agreement for further details.
 	(bus)
 )
 (connector
+	(text "q[3]" (rect 418 304 436 316)(font "Arial" ))
 	(pt 408 320)
 	(pt 536 320)
 )
 (connector
+	(text "q[2]" (rect 418 320 436 332)(font "Arial" ))
 	(pt 408 336)
 	(pt 536 336)
 )
 (connector
-	(pt 408 368)
-	(pt 536 368)
-)
-(connector
+	(text "q[1]" (rect 418 336 436 348)(font "Arial" ))
 	(pt 408 352)
 	(pt 536 352)
 )
 (connector
-	(pt 200 400)
-	(pt 232 400)
+	(text "q[0]" (rect 418 352 436 364)(font "Arial" ))
+	(pt 408 368)
+	(pt 536 368)
+)
+(connector
+	(text "q[3..0]" (rect 386 408 417 420)(font "Arial" ))
+	(pt 376 424)
+	(pt 408 424)
 	(bus)
 )
 (connector
+	(text "Clk" (rect 154 416 170 428)(font "Arial" ))
+	(pt 144 432)
 	(pt 232 432)
-	(pt 200 432)
+)
+(connector
+	(pt 144 400)
+	(pt 168 400)
+)
+(connector
+	(pt 232 400)
+	(pt 216 400)
 )
 (junction (pt 408 320))
 (junction (pt 408 336))

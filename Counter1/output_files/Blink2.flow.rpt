@@ -1,5 +1,5 @@
 Flow report for Blink2
-Sun Nov 20 16:13:01 2016
+Sun Nov 20 20:09:24 2016
 Quartus II 64-Bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -40,17 +40,17 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Flow Summary                                                                         ;
 +------------------------------------+-------------------------------------------------+
-; Flow Status                        ; Successful - Sun Nov 20 16:12:58 2016           ;
+; Flow Status                        ; Successful - Sun Nov 20 20:09:22 2016           ;
 ; Quartus II 64-Bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
 ; Revision Name                      ; Blink2                                          ;
 ; Top-level Entity Name              ; Blink2                                          ;
 ; Family                             ; Cyclone II                                      ;
 ; Device                             ; EP2C5T144C8                                     ;
 ; Timing Models                      ; Final                                           ;
-; Total logic elements               ; 0 / 4,608 ( 0 % )                               ;
-;     Total combinational functions  ; 0 / 4,608 ( 0 % )                               ;
-;     Dedicated logic registers      ; 0 / 4,608 ( 0 % )                               ;
-; Total registers                    ; 0                                               ;
+; Total logic elements               ; 5 / 4,608 ( < 1 % )                             ;
+;     Total combinational functions  ; 5 / 4,608 ( < 1 % )                             ;
+;     Dedicated logic registers      ; 4 / 4,608 ( < 1 % )                             ;
+; Total registers                    ; 4                                               ;
 ; Total pins                         ; 6 / 89 ( 7 % )                                  ;
 ; Total virtual pins                 ; 0                                               ;
 ; Total memory bits                  ; 0 / 119,808 ( 0 % )                             ;
@@ -64,7 +64,7 @@ applicable agreement for further details.
 +-------------------+---------------------+
 ; Option            ; Setting             ;
 +-------------------+---------------------+
-; Start date & time ; 11/20/2016 16:12:50 ;
+; Start date & time ; 11/20/2016 20:09:10 ;
 ; Main task         ; Compilation         ;
 ; Revision Name     ; Blink2              ;
 +-------------------+---------------------+
@@ -75,7 +75,7 @@ applicable agreement for further details.
 +-------------------------------------+---------------------------------+---------------+-------------+------------+
 ; Assignment Name                     ; Value                           ; Default Value ; Entity Name ; Section Id ;
 +-------------------------------------+---------------------------------+---------------+-------------+------------+
-; COMPILER_SIGNATURE_ID               ; 154880084790001.147967636946692 ; --            ; --          ; --         ;
+; COMPILER_SIGNATURE_ID               ; 154880084790001.147969054946268 ; --            ; --          ; --         ;
 ; IP_TOOL_NAME                        ; LPM_COUNTER                     ; --            ; --          ; --         ;
 ; IP_TOOL_VERSION                     ; 13.0                            ; --            ; --          ; --         ;
 ; MAX_CORE_JUNCTION_TEMP              ; 85                              ; --            ; --          ; --         ;
@@ -94,11 +94,11 @@ applicable agreement for further details.
 +---------------------------+--------------+-------------------------+---------------------+------------------------------------+
 ; Module Name               ; Elapsed Time ; Average Processors Used ; Peak Virtual Memory ; Total CPU Time (on all processors) ;
 +---------------------------+--------------+-------------------------+---------------------+------------------------------------+
-; Analysis & Synthesis      ; 00:00:02     ; 1.0                     ; 519 MB              ; 00:00:02                           ;
-; Fitter                    ; 00:00:03     ; 1.0                     ; 679 MB              ; 00:00:03                           ;
+; Analysis & Synthesis      ; 00:00:04     ; 1.0                     ; 519 MB              ; 00:00:02                           ;
+; Fitter                    ; 00:00:05     ; 1.0                     ; 683 MB              ; 00:00:03                           ;
 ; Assembler                 ; 00:00:02     ; 1.0                     ; 438 MB              ; 00:00:01                           ;
-; TimeQuest Timing Analyzer ; 00:00:02     ; 1.0                     ; 420 MB              ; 00:00:01                           ;
-; Total                     ; 00:00:09     ; --                      ; --                  ; 00:00:07                           ;
+; TimeQuest Timing Analyzer ; 00:00:01     ; 1.0                     ; 420 MB              ; 00:00:01                           ;
+; Total                     ; 00:00:12     ; --                      ; --                  ; 00:00:07                           ;
 +---------------------------+--------------+-------------------------+---------------------+------------------------------------+
 
 
