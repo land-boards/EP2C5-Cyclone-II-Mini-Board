@@ -1,0 +1,46 @@
+{| class="wikitable"
+! FPGA Pin
+! Function
+! Notes
+|-
+| 3
+| D2 LED
+| Low to Light LED
+|-
+| 7
+| D4 LED
+| Low to Light LED
+|-
+| 9
+| D5 LED
+| Low to Light LED
+|-
+| 144
+| Pushbutton
+| Push to ground, no external pullup. Set internal pullup on FPGA configuration if used.
+|-
+| 17
+| 50MHz clock input
+| 
+|-
+| 73
+| 10uF capacitor to ground
+| 10K resistor to Vcc, for power up reset if needed?
+|-
+| 26
+| Connected to Vcc 1.2V
+| Only needed for EPC28. The "zero ohm" resistor could be removed and the pin used as normal.
+|-
+| 27
+| Connected to GND
+| Only needed for EPC28. The "zero ohm" resistor could be removed and the pin used as normal.
+|-
+| 80
+| Connected to GND
+| Only needed for EPC28. The "zero ohm" resistor could be removed and the pin used as normal.
+|-
+| 81
+| Connected to Vcc 1.2V
+| Only needed for EPC28. The "zero ohm" resistor could be removed and the pin used as normal.
+|-
+|}
