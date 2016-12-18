@@ -1,5 +1,5 @@
 Assembler report for uk101
-Tue Nov 22 12:25:01 2016
+Sat Dec 17 12:44:27 2016
 Quartus II 64-Bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -10,8 +10,8 @@ Quartus II 64-Bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edit
   2. Assembler Summary
   3. Assembler Settings
   4. Assembler Generated Files
-  5. Assembler Device Options: C:/Users/DGilliland/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/UK101/output_files/uk101.sof
-  6. Assembler Device Options: C:/Users/DGilliland/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/UK101/output_files/uk101.pof
+  5. Assembler Device Options: C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/UK101/output_files/uk101.sof
+  6. Assembler Device Options: C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/UK101/output_files/uk101.pof
   7. Assembler Messages
 
 
@@ -38,7 +38,7 @@ applicable agreement for further details.
 +---------------------------------------------------------------+
 ; Assembler Summary                                             ;
 +-----------------------+---------------------------------------+
-; Assembler Status      ; Successful - Tue Nov 22 12:25:01 2016 ;
+; Assembler Status      ; Successful - Sat Dec 17 12:44:27 2016 ;
 ; Revision Name         ; uk101                                 ;
 ; Top-level Entity Name ; uk101                                 ;
 ; Family                ; Cyclone II                            ;
@@ -78,37 +78,37 @@ applicable agreement for further details.
 +-----------------------------------------------------------------------------+----------+---------------+
 
 
-+-----------------------------------------------------------------------------------------------+
-; Assembler Generated Files                                                                     ;
-+-----------------------------------------------------------------------------------------------+
-; File Name                                                                                     ;
-+-----------------------------------------------------------------------------------------------+
-; C:/Users/DGilliland/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/UK101/output_files/uk101.sof ;
-; C:/Users/DGilliland/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/UK101/output_files/uk101.pof ;
-+-----------------------------------------------------------------------------------------------+
++---------------------------------------------------------------------------------------------+
+; Assembler Generated Files                                                                   ;
++---------------------------------------------------------------------------------------------+
+; File Name                                                                                   ;
++---------------------------------------------------------------------------------------------+
+; C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/UK101/output_files/uk101.sof ;
+; C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/UK101/output_files/uk101.pof ;
++---------------------------------------------------------------------------------------------+
 
 
-+-------------------------------------------------------------------------------------------------------------------------+
-; Assembler Device Options: C:/Users/DGilliland/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/UK101/output_files/uk101.sof ;
-+----------------+--------------------------------------------------------------------------------------------------------+
-; Option         ; Setting                                                                                                ;
-+----------------+--------------------------------------------------------------------------------------------------------+
-; Device         ; EP2C5T144C8                                                                                            ;
-; JTAG usercode  ; 0x0041901E                                                                                             ;
-; Checksum       ; 0x0041901E                                                                                             ;
-+----------------+--------------------------------------------------------------------------------------------------------+
++-----------------------------------------------------------------------------------------------------------------------+
+; Assembler Device Options: C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/UK101/output_files/uk101.sof ;
++----------------+------------------------------------------------------------------------------------------------------+
+; Option         ; Setting                                                                                              ;
++----------------+------------------------------------------------------------------------------------------------------+
+; Device         ; EP2C5T144C8                                                                                          ;
+; JTAG usercode  ; 0x004192BB                                                                                           ;
+; Checksum       ; 0x004192BB                                                                                           ;
++----------------+------------------------------------------------------------------------------------------------------+
 
 
-+-------------------------------------------------------------------------------------------------------------------------+
-; Assembler Device Options: C:/Users/DGilliland/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/UK101/output_files/uk101.pof ;
-+--------------------+----------------------------------------------------------------------------------------------------+
-; Option             ; Setting                                                                                            ;
-+--------------------+----------------------------------------------------------------------------------------------------+
-; Device             ; EPCS4                                                                                              ;
-; JTAG usercode      ; 0x00000000                                                                                         ;
-; Checksum           ; 0x0706F248                                                                                         ;
-; Compression Ratio  ; 1                                                                                                  ;
-+--------------------+----------------------------------------------------------------------------------------------------+
++-----------------------------------------------------------------------------------------------------------------------+
+; Assembler Device Options: C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/UK101/output_files/uk101.pof ;
++--------------------+--------------------------------------------------------------------------------------------------+
+; Option             ; Setting                                                                                          ;
++--------------------+--------------------------------------------------------------------------------------------------+
+; Device             ; EPCS4                                                                                            ;
+; JTAG usercode      ; 0x00000000                                                                                       ;
+; Checksum           ; 0x07081832                                                                                       ;
+; Compression Ratio  ; 1                                                                                                ;
++--------------------+--------------------------------------------------------------------------------------------------+
 
 
 +--------------------+
@@ -117,14 +117,14 @@ applicable agreement for further details.
 Info: *******************************************************************
 Info: Running Quartus II 64-Bit Assembler
     Info: Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
-    Info: Processing started: Tue Nov 22 12:24:59 2016
+    Info: Processing started: Sat Dec 17 12:44:24 2016
 Info: Command: quartus_asm --read_settings_files=off --write_settings_files=off uk101 -c uk101
 Info (115031): Writing out detailed assembly data for power analysis
 Info (115030): Assembler is generating device programming files
 Info: Quartus II 64-Bit Assembler was successful. 0 errors, 0 warnings
-    Info: Peak virtual memory: 407 megabytes
-    Info: Processing ended: Tue Nov 22 12:25:01 2016
-    Info: Elapsed time: 00:00:02
-    Info: Total CPU time (on all processors): 00:00:01
+    Info: Peak virtual memory: 434 megabytes
+    Info: Processing ended: Sat Dec 17 12:44:27 2016
+    Info: Elapsed time: 00:00:03
+    Info: Total CPU time (on all processors): 00:00:02
 
 

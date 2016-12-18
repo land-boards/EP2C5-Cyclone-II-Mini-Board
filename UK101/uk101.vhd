@@ -6,6 +6,12 @@ use  IEEE.STD_LOGIC_UNSIGNED.all;
 
 entity uk101 is
 	port(
+    sramData : inout std_logic_vector(7 downto 0);
+    sramAddress : out std_logic_vector(15 downto 0);
+    n_sRamWE : out std_logic;
+    n_sRamCS : out std_logic;
+    n_sRamOE : out std_logic;
+
 		n_reset		: in std_logic;
 		clk			: in std_logic;
 		rxd			: in std_logic;
@@ -13,6 +19,17 @@ entity uk101 is
 		rts			: out std_logic;
 		videoSync	: out std_logic;
 		video			: out std_logic;
+
+		tp41_p9_3	: out std_logic;
+		tp40_p9_4	: out std_logic;
+		tp43_p9_5	: out std_logic;
+		tp42_p9_6	: out std_logic;
+		tp45_p9_7	: out std_logic;
+		tp44_p9_8	: out std_logic;
+		tp48_p9_9	: out std_logic;
+		tp47_p9_10	: out std_logic;
+		reset_LED	: out std_logic;
+
 		ps2Clk		: in std_logic;
 		ps2Data		: in std_logic
 	);
@@ -31,7 +48,9 @@ architecture struct of uk101 is
 	signal aciaData		: std_logic_vector(7 downto 0);
 
 	signal n_memWR			: std_logic;
-	
+	signal n_memRD : std_logic;
+
+
 	signal n_dispRamCS	: std_logic;
 	signal n_ramCS			: std_logic;
 	signal n_basRomCS		: std_logic;
@@ -55,20 +74,31 @@ architecture struct of uk101 is
 
 begin
 
+    sramAddress(15 downto 0) <= cpuAddress(15 downto 0);
+    sramData <= cpuDataOut when n_WR='0' else (others => 'Z');
+    n_sRamWE <= n_memWR;
+    n_sRamOE <= n_memRD;
+    n_sRamCS <= n_ramCS;
+    n_memRD <= not(cpuClock) nand n_WR;
+
 	n_memWR <= not(cpuClock) nand (not n_WR);
+	tp41_p9_3 <= cpuClock;
+	tp40_p9_4 <= cpuAddress(0);
+	reset_LED <= n_reset;
 
 	n_dispRamCS <= '0' when cpuAddress(15 downto 10) = "110100" else '1';
 	n_basRomCS <= '0' when cpuAddress(15 downto 13) = "101" else '1'; --8k
 	n_monitorRomCS <= '0' when cpuAddress(15 downto 11) = "11111" else '1'; --2K
-	n_ramCS <= '0' when cpuAddress(15 downto 12)="0000" else '1';
+	 n_ramCS <= not(n_dispRamCS and n_basRomCS and n_monitorRomCS and n_aciaCS and n_kbCS);
 	n_aciaCS <= '0' when cpuAddress(15 downto 1) = "111100000000000" else '1';
 	n_kbCS <= '0' when cpuAddress(15 downto 10) = "110111" else '1';
+	
  
 	cpuDataIn <=
 		basRomData when n_basRomCS = '0' else
 		monitorRomData when n_monitorRomCS = '0' else
 		aciaData when n_aciaCS = '0' else
-		ramDataOut when n_ramCS = '0' else
+		sramData when n_ramCS = '0' else
 		dispRamDataOutA when n_dispRamCS = '0' else
 		kbReadData when n_kbCS='0'
 		else x"FF";
@@ -88,7 +118,6 @@ begin
 		A(15 downto 0) => cpuAddress,
 		DI => cpuDataIn,
 		DO => cpuDataOut);
-			
 
 	u2 : entity work.BasicRom -- 8KB
 	port map(
@@ -97,16 +126,6 @@ begin
 		q => basRomData
 	);
 
-	u3: entity work.ProgRam 
-	port map
-	(
-		address => cpuAddress(11 downto 0),
-		clock => clk,
-		data => cpuDataOut,
-		wren => not(n_memWR or n_ramCS),
-		q => ramDataOut
-	);
-	
 	u4: entity work.CegmonRom
 	port map
 	(
