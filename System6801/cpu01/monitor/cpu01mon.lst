@@ -1,0 +1,1902 @@
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0001
+ 
+ 
+
+00001                          **===========================================================================**
+00002                          **
+00003                          **  D E B U G G E R    CPU01 Debug Monitor
+00004                          **
+00005                          **  www.OpenCores.Org - August 2003
+00006                          **  This software adheres to the GNU public license  
+00007                          **
+00008                          ** File name      : cpu01mon.sa
+00009                          **
+00010                          ** Purpose        : Implements a built-in Debug monitor
+00011                          **                  for the System6801 compatible CPU core
+00012                          **
+00013                          ** Author         : Michael L. Hasenfratz Sr.
+00014                          **
+00015                          **===========================================================================**
+00016                          **
+00017                          ** Revision History:
+00018                          **
+00019                          ** Date:  Revision Author
+00020                          **===========================================================================**
+00021                          ** 12 Oct 2003  0.1  Michael L. Hasenfratz Sr.
+00022                          **
+00023                                           NAM        CPU01MON         
+00024                                           TTL        Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801 
+
+00026                          *
+00027                          *    This is a debug monitor for use with
+00028                          *    the OpenCore System6801 CPU 
+00029                          *    Or MOTOROLA MC6800 MICROPROCESSORS
+00030                          *
+
+00032                          *
+00033                          *    PROGRAM START ADDRESS
+00034                          *
+00035   F800                   ROMSTR           EQU        $F800            . ROM START ADDRESS
+00036   0080                   RAMSTR           EQU        $0080            . RAM START ADDRESS
+00037   0100                   RAMEND           EQU        $0100            . RAM END ADDRESS
+00038   0000                   IO$STR           EQU        $0000            . INTERNAL REGISTERS
+
+00040                          *
+00041                          *      wb_acia (ACIA) SERIAL PORT ADDRESS DEFINITION
+00042                          *
+00043   0010                   ACIA$S           EQU        IO$STR+$10       . Start of the ACIA
+00044   0010                   ACCTRL           EQU        ACIA$S+0         . ACIA CONTROL
+00045   0010                   ACSTAT           EQU        ACIA$S+0         . ACIA STATUS
+00046   0011                   RXDATA           EQU        ACIA$S+1         . RECEIVE DATA PORT
+00047   0011                   TXDATA           EQU        ACIA$S+1         . TRANSMIT DATA PORT
+00048   0001                   RDRF             EQU        %00000001        . RCV DATA REG FULL
+00049   0002                   TDRE             EQU        %00000010        . TX DATA REG EMPTY
+
+00051                          *
+00052                          *    SOME ASCII CHARACTER DEFINITIONS
+00053                          *
+00054   000D                   CR               EQU        $0D              . <CR>
+00055   000A                   LF               EQU        $0A              . <LF>
+00056   0020                   SPACE            EQU        $20              . <SPACE>
+00057   0007                   BELL             EQU        $07              . <BELL/BEEP>
+
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0002
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+00059                          *
+00060                          *     RAM LOCATIONS REQUIRED 
+00061                          *
+00062                                           ORG        RAMSTR           
+00063   0080                   VARSTR           EQU        *                
+00064   0080                   USTACK           RMB        2                . USER'S STACK POINTER
+
+00066                          *
+00067                          *      VECTOR BUFFER
+00068                          *
+00069   0082                   VECBUF           EQU        *                
+00070   0082                   IRQSCI           RMB        2                . 'SCI' VECTOR
+00071   0084                   IRQTOF           RMB        2                . 'TOF' VECTOR
+00072   0086                   IRQOCF           RMB        2                . 'OCF' VECTOR
+00073   0088                   IRQICF           RMB        2                . 'ICF' VECTOR
+00074   008A                   IRQ$VC           RMB        2                . IRQ VECTOR
+00075   008C                   SWI$VC           RMB        2                . SWI #1 VECTOR
+00076   008E                   NMI$VC           RMB        2                . NMI VECTOR
+
+00078                          *
+00079                          *      MISC. REGISTERS
+00080                          *
+00081   0090                   ADDRES           RMB        2                . ADDRESS TEMPORARY STORAGE
+00082   0092                   AECHO            RMB        1                . ECHO FLAG
+00083   0093                   BYTECT           RMB        1                . BYTE COUNT (LOADER)
+00084   0094                   CHKSUM           RMB        1                . CHECK-SUM (LOADER)
+00085   0095                   IRQFLG           RMB        1                . IRQ FLAG 0=STOP IRQ
+00086   0096                   VFLAG            RMB        1                . VALUE FLAG 0=NO ENTRY
+00087   0097                   VALUE            RMB        2                . BINARY VALUE ENTERED
+00088   0099                   BRKPTS           RMB        4*4              . 4 BREAK-POINTS MAY BE SET
+00089   00A9                   OFFSET           RMB        2                . OFFSET TO BE ADDED TO ADDRESSES
+00090   00AB                   DB$STK           RMB        2                . DEBUG STACK
+00091   00AD                   BEGADR           RMB        2                . BEGIN ADDRESS
+00092   00AF                   ENDADR           RMB        2                . END ADDRESS
+00093   00B1                   TMP$00           RMB        2                . SOME TEMPORARY STORAGE
+00094   00B3                   TMP$01           RMB        2                
+00095   00B5                   TMP$02           RMB        2                
+00096   00B7                   TMP$03           RMB        2                
+00097   00B9                   VAREND           EQU        *                
+
+00099   00DB                   U$STK            EQU        (VAREND+((RAMEND-VAREND)/2))-1 . USER'S STACK
+00100   00FF                   STACK            EQU        RAMEND-1         
+
+00102                          *
+00103                          *    ROM START (JUMP TABLE)
+00104                          *
+00105                                           ORG        ROMSTR           
+00106   F800 7E F9 E3                           JMP        INCH             . INPUT 1 CHAR FROM CONSOLE (W/PARITY)
+00107   F803 7E F9 DE                           JMP        INCHNP           . INPUT 1 CHAR FROM CONSOLE (WO/PARITY)
+00108   F806 7E F9 F0                           JMP        OUTCH            . OUTPUT 1 CHAR TO CONSOLE
+00109   F809 7E F9 FB                           JMP        PDATA            . PRINT <CR>,<LF>,<NULLS> & STRING (TO EOT)
+00110   F80C 7E F9 FD                           JMP        PDATA1           . PRINT STRING (TO EOT)
+00111   F80F 7E FA 09                           JMP        PCRLF            . PRINT <CR>,<LF>,<NULLS>
+00112   F812 7E FB E7                           JMP        GO$SB2           . RE-ENTER MONITOR (WO/INITIALIZATION)
+00113   F815 7E FC D2                           JMP        BEGEND           . GET BEGIN/END ADDRESSES
+00114   F818 7E FA 6F                           JMP        OUT2HS           . PRINT 2 HEX CHARS & <SP>
+00115   F81B 7E FA 6D                           JMP        OUT4HS           . PRINT 4 HEX CHARS & <SP>
+
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0003
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+00117                          *
+00118                          *   (wb_acia) ACIA INITIALIZATION VALUE
+00119                          *
+00120   F81E 15                ACINIT           FCB        %00010101        . NO RCV IRQ, NO XMIT IRQ, 8 BIT, NO PARITY, 1 STOP, 96
+
+00122                          *
+00123                          *    S T R I N G S   A N D   T H I N G S
+00124                          *
+00125   F81F 43 50 55 30 31    HEADER           FCC        /CPU01MON Ver. 2.2/ 
+00126   F830 04                                 FCB        4                
+00127   F831 00 00 00 00 3E    PRMT             FCB        0,0,0,0,'>,4     
+00128   F837 20 2D 20 49 4E    INVAL            FCC        / - INV/         
+00129   F83D 04                                 FCB        4                
+00130   F83E 42 45 47 20 41    BEGMSG           FCC        /BEG ADDR - /    
+00131   F849 04                                 FCB        4                
+00132   F84A 45 4E 44 20 41    ENDMSG           FCC        /END ADDR - /    
+00133   F855 04                                 FCB        4                
+00134   F856 13                MEMERR           FCB        $13              . READER OFF
+00135   F857 20 2D 20 4E 4F                     FCC        / - NO CHANGE/   
+00136   F863 07 04             WHAT             FCB        BELL,4           
+00137   F865 4E 4F 20 43 4F    CMPMSG           FCC        /NO COMPARE @/   
+00138   F871 07 04                              FCB        BELL,4           
+00139   F873 13                CHKERR           FCB        $13              . READER OFF
+00140   F874 20 2D 20 43 48                     FCC        / - CHK SUM ERR/ 
+00141   F882 07 04                              FCB        BELL,4           
+00142   F884 13                LOADER           FCB        $13              . READER OFF
+00143   F885 20 2D 20 4C 4F                     FCC        / - LOAD ERR/    
+00144   F890 07 04                              FCB        BELL,4           
+00145   F892 20 20 20 42 52    BRKSTG           FCC        /   BREAK - POINTS/ 
+00146   F8A3 0D 0A 00 00 00    CRLF             FCB        CR,LF,0,0,0,0,4  
+00147   F8AA 52 45 54 55 52    RTSSTR           FCC        /RETURN/         
+00148   F8B0 04                                 FCB        4                
+00149   F8B1 52 45 47          REGSTR           FCC        /REG/            
+00150   F8B4 04                                 FCB        4                
+00151   F8B5 49 52 51          IRQSTR           FCC        /IRQ/            
+00152   F8B8 04                                 FCB        4                
+00153   F8B9 53 57 49          SWISTR           FCC        /SWI/            
+00154   F8BC 04                                 FCB        4                
+00155   F8BD 4E 4D 49          NMISTR           FCC        /NMI/            
+00156   F8C0 04                                 FCB        4                
+00157   F8C1 42 52 4B 20 50    BRKSTR           FCC        /BRK PNT/        
+00158   F8C8 04                                 FCB        4                
+00159   F8C9 20 2D 20 43 43    DSPSTR           FCC        / - CC=/         . REGISTER DUMP STRING
+00160   F8CF 04                                 FCB        4                
+00161   F8D0 42 3D                              FCC        /B=/             
+00162   F8D2 04                                 FCB        4                
+00163   F8D3 41 3D                              FCC        /A=/             
+00164   F8D5 04                                 FCB        4                
+00165   F8D6 58 3D                              FCC        /X=/             
+00166   F8D8 04                                 FCB        4                
+00167   F8D9 50 43 3D                           FCC        /PC=/            
+00168   F8DC 04                                 FCB        4                
+00169   F8DD 53 3D                              FCC        /S=/             
+00170   F8DF 04                                 FCB        4                
+
+00172                          *
+00173                          *    R E S T A R T   E N T R Y   P O I N T
+00174                          *
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0004
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+00175   F8E0 8E 00 FF          COLD$            LDS        #STACK           . SET THE STACK
+
+00177                          *
+00178                          *       SET UP USERS STACK
+00179                          *
+00180   F8E3 CE 00 DB                           LDX        #U$STK           . POINT AT THE USER'S STACK
+00181   F8E6 DF 80                              STX        USTACK           . SET USER'S STACK
+00182   F8E8 BD FA C1                           JSR        IOSET            . INIT THE PORTS
+
+00184                          *
+00185                          *    RESET THE VECTORS
+00186                          *
+00187   F8EB CE FF 6E                           LDX        #VECTBL          . POINT AT THE TABLE
+00188   F8EE DF B1                              STX        TMP$00           . SAVE THE SOURCE
+00189   F8F0 CE 00 82                           LDX        #VECBUF          . POINT AT THE BUFFER
+00190   F8F3 DF B3                              STX        TMP$01           . SAVE THE DESTINATION
+00191   F8F5 C6 0E                              LDAB       #2*7             . 14 BYTES TO MOVE
+00192   F8F7 DE B1             VCTLP0           LDX        TMP$00           . GET THE POINTER
+00193   F8F9 A6 00                              LDAA       0,X              . GET A BYTE
+00194   F8FB 08                                 INX                         
+00195   F8FC DF B1                              STX        TMP$00           
+00196   F8FE DE B3                              LDX        TMP$01           . GET THE DESTINATION
+00197   F900 A7 00                              STAA       0,X              
+00198   F902 08                                 INX                         
+00199   F903 DF B3                              STX        TMP$01           
+00200   F905 5A                                 DECB                        
+00201   F906 26 EF                              BNE        VCTLP0           . LOOP UNTIL FULL
+
+00203                          *
+00204                          *    CLEAR THE BREAK POINT TABLE
+00205                          *
+00206   F908 CE 00 99                           LDX        #BRKPTS          . POINT AT THE TABLE
+00207   F90B C6 10                              LDAB       #4*4             
+00208   F90D 6F 00             C$BRK            CLR        0,X              
+00209   F90F 08                                 INX                         
+00210   F910 5A                                 DECB                        
+00211   F911 26 FA                              BNE        C$BRK            
+00212   F913 86 01                              LDAA       #1               . SET THE IRQ BIT
+00213   F915 97 95                              STAA       IRQFLG           . CLR THE IRQ FLAG
+00214   F917 7F 00 A9                           CLR        OFFSET           . RESET THE ADDRESS OFFSET
+00215   F91A 7F 00 AA                           CLR        OFFSET+1         
+
+00217                          *
+00218                          *    PREPARE TO TALK TO THE USER
+00219                          *
+00220   F91D CE F8 1F                           LDX        #HEADER          . SEND SIGN-ON MESSAGE
+00221   F920 BD F9 FB                           JSR        PDATA            
+
+00223                          *
+00224                          *    CLEAR THE USER'S STACK
+00225                          *
+00226   F923 DE 80                              LDX        USTACK           
+00227   F925 08                                 INX                         
+00228   F926 86 07                              LDAA       #7               
+00229   F928 6F 00             CL$STK           CLR        0,X              . CLEAR THIS BYTE
+00230   F92A 08                                 INX                         
+00231   F92B 4A                                 DECA                        
+00232   F92C 26 FA                              BNE        CL$STK           
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0005
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+00233   F92E 9E 80                              LDS        USTACK           . POINT AT USER'S STACK
+
+00235                          *
+00236                          *    W A R M   S T A R T   E N T R Y   P O I N T
+00237                          *
+00238   F930 9F 80             WARM$            STS        USTACK           . SAVE THE USER'S STACK
+
+00240                          *
+00241                          *     H O T   S T A R T   E N T R Y   P O I N T
+00242                          *
+00243   F932 8E 00 FF          MON$             LDS        #STACK           . RESET MONITOR STACK
+00244   F935 CE F8 31                           LDX        #PRMT            . SEND PROMPT TO USER
+00245   F938 BD F9 FB                           JSR        PDATA            
+00246   F93B 7F 00 92                           CLR        AECHO            . RESET THE ECHO FLAG
+00247   F93E D6 95                              LDAB       IRQFLG           . SEE IF WE SHOULD SET/RESET IRQ BIT
+00248   F940 C4 01                              ANDB       #1               . ISOLATE THE BIT
+00249   F942 58                                 ASLB                        
+00250   F943 58                                 ASLB                        
+00251   F944 58                                 ASLB                        
+00252   F945 58                                 ASLB                        . PUT THE BIT IN IT'S PLACE
+00253   F946 07                                 TPA                         . GET THE CC'S
+00254   F947 84 EF                              ANDA       #%11101111       . ISOLATE THE IRQ BIT
+00255   F949 1B                                 ABA                         . ADD THE BIT
+00256   F94A 06                                 TAP                         . RESTORE THE CC'S
+00257   F94B CE F9 92                           LDX        #CMDTBL          . POINT AT TABLE OF COMMANDS
+00258   F94E 8D 11                              BSR        GETCMD           
+00259   F950 25 06                              BCS        WHATER           
+00260   F952 EE 01                              LDX        1,X              . DO THE COMMAND
+00261   F954 AD 00                              JSR        0,X              
+00262   F956 20 DA                              BRA        MON$             
+
+00264                          *
+00265                          *   SEND A 'WHAT' TO USER
+00266                          *
+00267   F958 CE F8 63          WHATER           LDX        #WHAT            
+00268   F95B BD F9 FD                           JSR        PDATA1           
+00269   F95E 7E F9 32                           JMP        MON$             
+
+00271                          *
+00272                          *    GET USER'S REQUEST
+00273                          *
+00274   F961 DF B7             GETCMD           STX        TMP$03           . SAVE TABLE ADDRESS
+00275   F963 CE 00 00          CMDLOP           LDX        #0               . ZERO OUT VALUE
+00276   F966 DF 97                              STX        VALUE            
+00277   F968 7F 00 96                           CLR        VFLAG            
+00278   F96B BD F9 DE          CMDLP0           JSR        INCHNP           . GET A CHAR. FROM THE USER
+00279   F96E BD F9 9C                           JSR        CHKHEX           . IS IT A HEX CHAR
+00280   F971 25 0A                              BCS        CHKCM0           . CHECK FOR COMMAND
+00281   F973 BD F9 B8                           JSR        ADDHEX           . ADD TO 'VALUE' A HEX NUMBER
+00282   F976 20 F3                              BRA        CMDLP0           . RETURN TO LOOP
+
+00284                          *
+00285                          *     CHECK FOR COMMAND
+00286                          *
+00287   F978 BD F9 DE          CHKCMD           JSR        INCHNP           . GET A CHAR.
+00288   F97B DF B7                              STX        TMP$03           . SAVE THE POINTER
+00289   F97D DE B7             CHKCM0           LDX        TMP$03           . POINT AT TABLE OF LEGAL COMMANDS
+00290   F97F 6D 00                              TST        0,X              . SEE IF DUMMY TABLE
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0006
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+00291   F981 27 0B                              BEQ        CHKDUM           . JUST EXIT
+00292   F983 A1 00             CHKCL0           CMPA       0,X              . THIS COMMAND?
+00293   F985 27 09                              BEQ        CMD$DO           . YES
+00294   F987 08                                 INX                         . MOVE TO NEXT COMMAND
+00295   F988 08                                 INX                         
+00296   F989 08                                 INX                         
+00297   F98A 6D 00                              TST        0,X              . END OF TABLE?
+00298   F98C 26 F5                              BNE        CHKCL0           . NO KEEP GOING
+00299   F98E 0D                CHKDUM           SEC                         . SET FOR ILLEGAL COMMAND
+00300   F98F 39                                 RTS                         
+
+00302                          *
+00303                          *    GOOD COMMAND
+00304                          *
+00305   F990 0C                CMD$DO           CLC                         . SET FOR LEGAL COMMAND RECEIVED
+00306   F991 39                                 RTS                         
+
+00308                          *
+00309                          *    TABLE OF LEGAL COMMANDS
+00310                          *
+00311   F992 2F                CMDTBL           FCB        '/               . EXAMINE MEMORY
+00312   F993 FA CB                              FDB        EXAMIN           
+00313   F995 3B                                 FCB        ';               . SUB-PROGRAM ROUTINE
+00314   F996 FB 70                              FDB        SUBPRG           
+00315   F998 0D                                 FCB        CR               . DUMMY COMMAND (IGNORE)
+00316   F999 F9 8E                              FDB        CHKDUM           
+00317   F99B 00                                 FCB        0                . END OF TABLE
+
+00319                          *
+00320                          *    CHECK CHARACTER IN 'A' FOR HEX
+00321                          *
+00322   F99C 81 30             CHKHEX           CMPA       #'0              . SEE IF NUMERIC
+00323   F99E 2D 0C                              BLT        CHKHNO           
+00324   F9A0 81 39                              CMPA       #'9              
+00325   F9A2 23 0A                              BLS        CISHEX           
+00326   F9A4 81 41                              CMPA       #'A              . ALFA?
+00327   F9A6 2D 04                              BLT        CHKHNO           
+00328   F9A8 81 46                              CMPA       #'F              
+00329   F9AA 23 02                              BLS        CISHEX           
+00330   F9AC 0D                CHKHNO           SEC                         
+00331   F9AD 39                                 RTS                         
+
+00333                          *
+00334   F9AE 80 30             CISHEX           SUBA       #'0              
+00335   F9B0 81 09                              CMPA       #9               . DONE?
+00336   F9B2 23 02                              BLS        CHKHDN           
+00337   F9B4 80 07                              SUBA       #7               . ALFA
+00338   F9B6 0C                CHKHDN           CLC                         
+00339   F9B7 39                                 RTS                         
+
+00341                          *
+00342                          *      ADD A HEX NUMBER IN 'A' TO 'VALUE'
+00343                          *
+00344   F9B8 78 00 98          ADDHEX           ASL        VALUE+1          . MULTIPLY VALUE BY 16
+00345   F9BB 79 00 97                           ROL        VALUE            
+00346   F9BE 78 00 98                           ASL        VALUE+1          
+00347   F9C1 79 00 97                           ROL        VALUE            
+00348   F9C4 78 00 98                           ASL        VALUE+1          
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0007
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+00349   F9C7 79 00 97                           ROL        VALUE            
+00350   F9CA 78 00 98                           ASL        VALUE+1          
+00351   F9CD 79 00 97                           ROL        VALUE            
+00352   F9D0 9B 98                              ADDA       VALUE+1          
+00353   F9D2 97 98                              STAA       VALUE+1          
+00354   F9D4 24 03                              BCC        ADDONE           
+00355   F9D6 7C 00 97                           INC        VALUE            
+00356   F9D9 86 01             ADDONE           LDAA       #1               . SET FLAG
+00357   F9DB 97 96                              STAA       VFLAG            
+00358   F9DD 39                                 RTS                         
+
+00360                          *
+00361                          *    INPUT 1 CHARACTER FROM ACIA WO/PARITY
+00362                          *
+00363   F9DE 8D 03             INCHNP           BSR        INCH             . GET A CHAR.
+00364   F9E0 84 7F                              ANDA       #$7F             . REMOVE THE PARITY BIT
+00365   F9E2 39                                 RTS                         
+
+00367                          *
+00368                          *    INPUT 1 CHARACTER FROM ACIA W/PARITY
+00369                          *
+00370   F9E3 96 10             INCH             LDAA       ACSTAT           . CHECK FOR RDRF
+00371   F9E5 85 01                              BITA       #RDRF            
+00372   F9E7 27 FA                              BEQ        INCH             
+00373   F9E9 96 11                              LDAA       RXDATA           . GET THE CHAR.
+00374   F9EB 7D 00 92                           TST        AECHO            . SHOULD WE ECHO THE CHAR.
+00375   F9EE 26 0A                              BNE        OUTRTS           
+
+00377                          *
+00378                          *    OUTPUT 1 CHARACTER
+00379                          *
+00380   F9F0 37                OUTCH            PSHB                        . SAVE B REG
+00381   F9F1 D6 10             OUT$LP           LDAB       ACSTAT           . WAIT FOR TDRE
+00382   F9F3 C5 02                              BITB       #TDRE            
+00383   F9F5 27 FA                              BEQ        OUT$LP           
+00384   F9F7 97 11                              STAA       TXDATA           . OUTPUT THE CHAR.
+00385   F9F9 33                                 PULB                        . RESTORE THE REGS
+00386   F9FA 39                OUTRTS           RTS                         
+
+00388                          *
+00389                          *     PRINT <CR><LF>'STRING'
+00390                          *
+00391   F9FB 8D 0C             PDATA            BSR        PCRLF            . PRINT A <CR><LF>
+00392   F9FD A6 00             PDATA1           LDAA       0,X              . GET A CHAR.
+00393   F9FF 08                                 INX                         . MOVE TO NEXT CHAR.
+00394   FA00 81 04                              CMPA       #4               . EOT?
+00395   FA02 27 04                              BEQ        P$DONE           . YES
+00396   FA04 8D EA                              BSR        OUTCH            
+00397   FA06 20 F5                              BRA        PDATA1           
+00398   FA08 39                P$DONE           RTS                         
+
+00400                          *
+00401                          *   PRINT A <CR><LF>
+00402                          *
+00403   FA09 DF B5             PCRLF            STX        TMP$02           . SAVE THE XREG
+00404   FA0B CE F8 A3                           LDX        #CRLF            
+00405   FA0E 8D ED                              BSR        PDATA1           . SEND THIS STRING
+00406   FA10 DE B5                              LDX        TMP$02           . RESTORE THE XREG
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0008
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+00407   FA12 39                                 RTS                         
+
+00409                          *
+00410                          *    DISPLAY MPU REGISTERS
+00411                          *
+00412   FA13 CE F8 AA          DSPRTS           LDX        #RTSSTR          
+00413   FA16 20 19                              BRA        DSPRTN           
+
+00415                          *
+00416   FA18 CE F8 B1          DSPREG           LDX        #REGSTR          
+00417   FA1B 20 14                              BRA        DSPRTN           
+
+00419                          *
+00420   FA1D CE F8 B9          DSPSWI           LDX        #SWISTR          
+00421   FA20 20 0F                              BRA        DSPRTN           
+
+00423                          *
+00424   FA22 CE F8 B5          DSPIRQ           LDX        #IRQSTR          
+00425   FA25 20 0A                              BRA        DSPRTN           
+
+00427                          *
+00428   FA27 CE F8 C1          DSPBRK           LDX        #BRKSTR          
+00429   FA2A 20 05                              BRA        DSPRTN           
+
+00431                          *
+00432   FA2C CE F8 BD          DSPNMI           LDX        #NMISTR          
+00433   FA2F 20 00                              BRA        DSPRTN           
+
+00435                          *
+00436                          *    DISPLAY THE REGISTERS
+00437                          *
+00438   FA31 BD F9 FB          DSPRTN           JSR        PDATA            . PRINT THE STRING
+00439   FA34 CE F8 C9                           LDX        #DSPSTR          
+00440   FA37 DF B3                              STX        TMP$01           
+00441   FA39 DE 80                              LDX        USTACK           . POINT AT THE USER'S STACK
+00442   FA3B 08                                 INX                         
+00443   FA3C C6 03                              LDAB       #3               . PRINT THE 3, 2 BYTE REGISTERS
+00444   FA3E 8D 1B                              BSR        PRNT2B           
+00445   FA40 C6 02                              LDAB       #2               . PRINT THE 2, 4 BYTE REGISTERS
+00446   FA42 8D 05                              BSR        PRNT4B           
+00447   FA44 CE 00 80                           LDX        #USTACK          . POINT AT THE ADDRESS
+00448   FA47 C6 01                              LDAB       #1               . PRINT THE STACK ADDRESS
+
+00450                          *
+00451                          *    PRINT 4 BYTE REGISTER
+00452                          *
+00453   FA49 DF B1             PRNT4B           STX        TMP$00           
+00454   FA4B DE B3                              LDX        TMP$01           
+00455   FA4D BD F9 FD                           JSR        PDATA1           . PRINT THE STRING
+00456   FA50 DF B3                              STX        TMP$01           . SWAP THE REGISTERS
+00457   FA52 DE B1                              LDX        TMP$00           
+00458   FA54 BD FA 6D                           JSR        OUT4HS           . PRINT VALUE
+00459   FA57 5A                                 DECB                        
+00460   FA58 26 EF                              BNE        PRNT4B           
+00461   FA5A 39                                 RTS                         
+
+00463                          *
+00464                          *    PRINT 2 BYTE REGISTER
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0009
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+00465                          *
+00466   FA5B DF B1             PRNT2B           STX        TMP$00           
+00467   FA5D DE B3                              LDX        TMP$01           
+00468   FA5F BD F9 FD                           JSR        PDATA1           . PRINT THE STRING
+00469   FA62 DF B3                              STX        TMP$01           . SWAP THE REGISTERS
+00470   FA64 DE B1                              LDX        TMP$00           
+00471   FA66 BD FA 6F                           JSR        OUT2HS           . PRINT THE DATA
+00472   FA69 5A                                 DECB                        
+00473   FA6A 26 EF                              BNE        PRNT2B           
+00474   FA6C 39                                 RTS                         
+
+00476                          *
+00477                          *     OUTPUT HEX CHARS W/SPACE
+00478                          *
+00479   FA6D 8D 07             OUT4HS           BSR        OUT2H            
+00480   FA6F 8D 05             OUT2HS           BSR        OUT2H            
+00481   FA71 86 20             OUTS             LDAA       #SPACE           . OUTPUT A SPACE
+00482   FA73 7E F9 F0                           JMP        OUTCH            
+
+00484                          *
+00485                          *     OUTPUT 2 HEX CHAR.S
+00486                          *
+00487   FA76 A6 00             OUT2H            LDAA       0,X              . GET THE CHAR.
+00488   FA78 44                                 LSRA                        . MOVE MSN TO LSN
+00489   FA79 44                                 LSRA                        
+00490   FA7A 44                                 LSRA                        
+00491   FA7B 44                                 LSRA                        
+00492   FA7C 8D 03                              BSR        HEX$IT           
+00493   FA7E A6 00                              LDAA       0,X              . GET CHAR. AGAIN
+00494   FA80 08                                 INX                         
+
+00496                          *
+00497                          *     CONVERT 'A' REG TO BINARY (LSN) TO ASCII
+00498                          *
+00499   FA81 84 0F             HEX$IT           ANDA       #%1111           . SAVE ONLY LSN
+00500   FA83 8A 30                              ORAA       #'0              . MAKE ASCII
+00501   FA85 81 39                              CMPA       #'9              
+00502   FA87 23 02                              BLS        OUTHX            . OUTPUT THE CHAR
+00503   FA89 8B 07                              ADDA       #7               . MAKE ALFA
+00504   FA8B 7E F9 F0          OUTHX            JMP        OUTCH            
+
+00506                          *
+00507                          *     INPUT 4 HEX CHARS
+00508                          *
+00509   FA8E 8D 0E             IN4HEX           BSR        IN2HEX           
+00510   FA90 25 2D                              BCS        NO$IHX           . WAS'NT HEX
+00511   FA92 36                                 PSHA                        . SAVE THE MSB
+00512   FA93 36                                 PSHA                        
+00513   FA94 8D 08                              BSR        IN2HEX           
+00514   FA96 30                                 TSX                         . POINT AT RESULT
+00515   FA97 A7 01                              STAA       1,X              . SAVE THE LSB
+00516   FA99 EE 00                              LDX        0,X              . GET THE RESULT
+00517   FA9B 31                                 INS                         . FIX THE STACK
+00518   FA9C 31                                 INS                         
+00519   FA9D 39                                 RTS                         
+
+00521                          *
+00522                          *    INPUT 2 HEX CHARS
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0010
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+00523                          *
+00524   FA9E 8D 18             IN2HEX           BSR        INHEX            . GET THE MSN
+00525   FAA0 25 1D                              BCS        NO$IHX           . NOT HEX
+00526   FAA2 48                                 ASLA                        . PUT IT IN THE MS NIBBLE
+00527   FAA3 48                                 ASLA                        
+00528   FAA4 48                                 ASLA                        
+00529   FAA5 48                                 ASLA                        
+00530   FAA6 97 B1                              STAA       TMP$00           . SAVE IT
+00531   FAA8 8D 0E                              BSR        INHEX            . GET THE LSN
+00532   FAAA 25 13                              BCS        NO$IHX           . NOT HEX
+00533   FAAC 9B B1                              ADDA       TMP$00           . ADD NIBBLES
+00534   FAAE 97 B1                              STAA       TMP$00           . SAVE IT
+00535   FAB0 9B 94                              ADDA       CHKSUM           . ADD TO CHECK SUM
+00536   FAB2 97 94                              STAA       CHKSUM           
+00537   FAB4 96 B1                              LDAA       TMP$00           . GET THE CHAR.
+00538   FAB6 0C                                 CLC                         
+00539   FAB7 39                                 RTS                         
+
+00541                          *
+00542                          *     INPUT 1 HEX CHAR. IN A
+00543                          *
+00544   FAB8 BD F9 DE          INHEX            JSR        INCHNP           . GET A BYTE FROM USER
+00545   FABB 7E F9 9C                           JMP        CHKHEX           . CHECK AND CONVERT
+
+00547                          *
+00548                          *     NOT HEX
+00549                          *
+00550   FABE 31                NO$IHY           INS                         . FIX THE STACK
+00551   FABF 0D                NO$IHX           SEC                         
+00552   FAC0 39                                 RTS                         
+
+00554                          *
+00555                          *     I/O INITIALIZATION
+00556                          *
+00557   FAC1 86 03             IOSET            LDAA       #%00000011       . TRASH THE ACIA
+00558   FAC3 97 10                              STAA       ACCTRL           
+00559   FAC5 B6 F8 1E                           LDAA       ACINIT           . GET THE INIT VALUE
+00560   FAC8 97 10                              STAA       ACCTRL           
+00561   FACA 39                                 RTS                         
+
+00563                          *
+00564                          *     EXAMINE MEMORY
+00565                          *
+00566   FACB D6 97             EXAMIN           LDAB       VALUE            . GET THE ADDRESS
+00567   FACD 96 98                              LDAA       VALUE+1          
+00568   FACF 9B AA                              ADDA       OFFSET+1         . ADD THE OFFSET
+00569   FAD1 D9 A9                              ADCB       OFFSET           
+00570   FAD3 D7 90                              STAB       ADDRES           . SAVE THE VALUE
+00571   FAD5 97 91                              STAA       ADDRES+1         
+
+00573                          *
+00574   FAD7 BD FA 09          EX$LP0           JSR        PCRLF            
+00575   FADA CE 00 90                           LDX        #ADDRES          . POINT AT THE DATA ADDRESS
+00576   FADD BD FA 6D                           JSR        OUT4HS           . PRINT THE ADDRESS
+00577   FAE0 DE 90             EX$LP1           LDX        ADDRES           . POINT AT THE DATA
+00578   FAE2 BD FA 6F                           JSR        OUT2HS           . PRINT THE DATA
+
+00580                          *
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0011
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+00581                          *     WAIT FOR COMMAND
+00582                          *
+00583   FAE5 CE FA F4          EX$LP2           LDX        #EXMTBL          . POINT AT TABLE OF COMMANDS
+00584   FAE8 BD F9 61                           JSR        GETCMD           . GET A VALUE AND/OR A COMMAND
+00585   FAEB 24 03                              BCC        EX$JMP           . LEGAL?
+00586   FAED 7E F9 58                           JMP        WHATER           . NO!
+
+00588                          *
+00589                          *    DO TO IT
+00590                          *
+00591   FAF0 EE 01             EX$JMP           LDX        1,X              . GET TASK ADDRESS
+00592   FAF2 6E 00                              JMP        0,X              . DO THE REQUEST
+
+00594                          *
+00595                          *     COMMAND TABLE
+00596                          *
+00597   FAF4 2F                EXMTBL           FCB        '/               . DISPLAY SAME ADDRESS
+00598   FAF5 FB 15                              FDB        EX$SAM           
+00599   FAF7 20                                 FCB        SPACE            . DISPLAY NEXT ADDRESS
+00600   FAF8 FB 07                              FDB        EX$NXT           
+00601   FAFA 0A                                 FCB        LF               . DISPLAY NEXT ADDRESS (ALT. METHOD)
+00602   FAFB FB 07                              FDB        EX$NXT           
+00603   FAFD 5E                                 FCB        '^               . DISPLAY LAST ADDRESS
+00604   FAFE FB 0E                              FDB        EX$BAK           
+00605   FB00 0D                                 FCB        CR               . RETURN TO MONITOR
+00606   FB01 FB 34                              FDB        EX$RTS           
+00607   FB03 3B                                 FCB        ';               . CALCULATE OFFSET
+00608   FB04 FB 37                              FDB        EX$OFS           
+00609   FB06 00                                 FCB        0                
+
+00611                          *
+00612                          *    DISPLAY NEXT ADDRESS
+00613                          *
+00614   FB07 8D 10             EX$NXT           BSR        EX$STR           . TRY TO STORE VALUE
+00615   FB09 08                                 INX                         
+00616   FB0A DF 90                              STX        ADDRES           
+00617   FB0C 20 C9                              BRA        EX$LP0           
+
+00619                          *
+00620                          *    DISPLAY LAST ADDRESS
+00621                          *
+00622   FB0E 8D 09             EX$BAK           BSR        EX$STR           . TRY TO STORE THE CHAR.
+00623   FB10 09                                 DEX                         
+00624   FB11 DF 90                              STX        ADDRES           . SAVE THE NEW VALUE
+00625   FB13 20 C2                              BRA        EX$LP0           
+
+00627                          *
+00628                          *    DISPLAY SAME ADDRESS
+00629                          *
+00630   FB15 8D 02             EX$SAM           BSR        EX$STR           . TRY TO STORE THE CHAR.
+00631   FB17 20 C7                              BRA        EX$LP1           . DON'T MOVE TO NEW LINE
+
+00633                          *
+00634                          *   STORE THE VALUE
+00635                          *
+00636   FB19 DE 90             EX$STR           LDX        ADDRES           . POINT AT MEMORY
+00637   FB1B 7D 00 96                           TST        VFLAG            . SHOULD WE STORE IT?
+00638   FB1E 27 08                              BEQ        EXNSTR           . NO
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0012
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+00639   FB20 96 98                              LDAA       VALUE+1          . GET THE VALUE
+00640   FB22 A7 00                              STAA       0,X              . STORE IT
+00641   FB24 A1 00                              CMPA       0,X              . SEE IF GOOD MEMORY
+00642   FB26 26 01                              BNE        EX$BEL           . NO CHANGE
+00643   FB28 39                EXNSTR           RTS                         
+
+00645                          *
+00646                          *   NO CHANGE IN MEMORY
+00647                          *
+00648   FB29 DF B1             EX$BEL           STX        TMP$00           . SAVE ADDRESS
+00649   FB2B CE F8 56                           LDX        #MEMERR          . MEMORY ERROR
+00650   FB2E BD F9 FD                           JSR        PDATA1           
+00651   FB31 DE B1                              LDX        TMP$00           . RESTORE ADDRESS
+00652   FB33 39                                 RTS                         
+
+00654                          *
+00655                          *    RETURN TO THE MONITOR
+00656                          *
+00657   FB34 8D E3             EX$RTS           BSR        EX$STR           . TRY TO STORE THE VALUE
+00658   FB36 39                                 RTS                         . RETURN TO THE MONITOR
+
+00660                          *
+00661                          *    CALCULATE OFFSET TO ADDRESS
+00662                          *
+00663   FB37 BD F9 DE          EX$OFS           JSR        INCHNP           . GET THE NEXT CHAR.
+00664   FB3A 81 4F                              CMPA       #'O              . OFFSET?
+00665   FB3C 26 2F                              BNE        EX$OEX           . NO
+00666   FB3E BD FA 71                           JSR        OUTS             . SEND A SPACE
+00667   FB41 D6 97                              LDAB       VALUE            . GET THE OFFSET VALUE
+00668   FB43 96 98                              LDAA       VALUE+1          
+00669   FB45 90 91                              SUBA       ADDRES+1         . SUBTRACT THE CURRENT ADDRESS
+00670   FB47 D2 90                              SBCB       ADDRES           
+00671   FB49 80 01                              SUBA       #1               . SAME ADDRES =-1
+00672   FB4B C2 00                              SBCB       #0               
+00673   FB4D 36                                 PSHA                        . SAVE IT ON THE STACK
+00674   FB4E 30                                 TSX                         . POINT AT LONG VALUE
+00675   FB4F C1 00                              CMPB       #0               . IF A <> $FF OR $00 THEN ILLEGAL BRANCH
+00676   FB51 26 06                              BNE        EX$SHX           . MIGHT STILL BE GOOD
+00677   FB53 85 80                              BITA       #$80             . MSB MUST BE 0
+00678   FB55 27 12                              BEQ        EX$SHT           . GOOD BRANCH
+00679   FB57 20 08                              BRA        EX$LNG           . INVALID
+00680   FB59 C1 FF             EX$SHX           CMPB       #$FF             
+00681   FB5B 26 04                              BNE        EX$LNG           . GOOD SHORT
+00682   FB5D 85 80                              BITA       #$80             . MSB MUST BE 1
+00683   FB5F 26 08                              BNE        EX$SHT           . GOOD BRANCH
+00684   FB61 CE F8 37          EX$LNG           LDX        #INVAL           . INVALID BRANCH
+00685   FB64 BD F9 FD                           JSR        PDATA1           
+00686   FB67 20 03                              BRA        EX$FST           . GO FIX THE STACK
+00687   FB69 BD FA 6F          EX$SHT           JSR        OUT2HS           . OUTPUT (SHORT) VALUE
+00688   FB6C 31                EX$FST           INS                         . FIX THE STACK
+00689   FB6D 7E FA D7          EX$OEX           JMP        EX$LP0           
+
+00691                          *
+00692                          *    SUB-COMMANDS
+00693                          *
+00694   FB70 CE FB 7F          SUBPRG           LDX        #SUBTBL          . POINT AT TABLE OF SUB-COMMANDS
+00695   FB73 BD F9 78                           JSR        CHKCMD           . GET THE REQUEST
+00696   FB76 24 03                              BCC        SB$JMP           . LEGAL?
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0013
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+00697   FB78 7E F9 58                           JMP        WHATER           . ILLEGAL COMMAND
+
+00699                          *
+00700                          *    GO DO IT
+00701                          *
+00702   FB7B EE 01             SB$JMP           LDX        1,X              . GET THE TASK
+00703   FB7D 6E 00                              JMP        0,X              . GO TO IT.
+
+00705                          *
+00706                          *     TABLE OF SUB-COMANDS
+00707                          *
+00708   FB7F 52                SUBTBL           FCB        'R               . DISPLAY REGISTERS
+00709   FB80 FA 18                              FDB        DSPREG           
+00710   FB82 47                                 FCB        'G               . GO TO USER'S PROGRAM
+00711   FB83 FB A7                              FDB        GO$USR           
+00712   FB85 53                                 FCB        'S               . GO TO USER'S SUB-ROUTINE
+00713   FB86 FB BB                              FDB        GO$SUB           
+00714   FB88 56                                 FCB        'V               . SET/DISPLAY BREAK-POINTS
+00715   FB89 FC 29                              FDB        SBKRTN           
+00716   FB8B 55                                 FCB        'U               . CLEAR BREAK-POINTS
+00717   FB8C FC 61                              FDB        CBKRTN           
+00718   FB8E 44                                 FCB        'D               . DISPLAY MEMORY
+00719   FB8F FD CC                              FDB        DSPMEM           
+00720   FB91 50                                 FCB        'P               . CONTINUE USER'S PROGRAM
+00721   FB92 FC 08                              FDB        GO$CON           
+00722   FB94 46                                 FCB        'F               . FILL MEMORY WITH CHAR.
+00723   FB95 FC F7                              FDB        FILMEM           
+00724   FB97 43                                 FCB        'C               . COMPARE MEMORY WITH CHAR.
+00725   FB98 FD 27                              FDB        CMPMEM           
+00726   FB9A 4D                                 FCB        'M               . MOVE MEMORY
+00727   FB9B FD 71                              FDB        MOVMEM           
+00728   FB9D 49                                 FCB        'I               . SET/RESET/PRINT IRQ FLAG
+00729   FB9E FD 99                              FDB        IRQ$RT           
+00730   FBA0 4F                                 FCB        'O               . SET OR RESET OFFSET
+00731   FBA1 FC 14                              FDB        OFS$RT           
+00732   FBA3 4C                                 FCB        'L               . 'S1' RECORD LOADER
+00733   FBA4 FE 44                              FDB        LOAD             
+00734   FBA6 00                                 FCB        0                
+
+00736                          *
+00737                          *     GO TO USER PROGRAM
+00738                          *
+00739   FBA7 7D 00 96          GO$USR           TST        VFLAG            . SEE IF VALID REQUEST
+00740   FBAA 27 53                              BEQ        GO$BAD           . CAN'T DO THAT
+00741   FBAC 9E 80                              LDS        USTACK           . GET USER'S STACK
+00742   FBAE 30                                 TSX                         
+00743   FBAF D6 97                              LDAB       VALUE            . GET NEW ADDRESS
+00744   FBB1 96 98                              LDAA       VALUE+1          
+00745   FBB3 E7 05                              STAB       5,X              . SET PC COUNTER
+00746   FBB5 A7 06                              STAA       6,X              
+00747   FBB7 BD FC 98          GOU$DO           JSR        SETBRK           . GO SET THE BREAK POINTS
+00748   FBBA 3B                                 RTI                         
+
+00750                          *
+00751                          *     GO TO USER'S SUB-ROUTINE
+00752                          *
+00753   FBBB 7D 00 96          GO$SUB           TST        VFLAG            . SEE IF ADDRESS SET
+00754   FBBE 27 3F                              BEQ        GO$BAD           . CAN'T
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0014
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+00755   FBC0 9E 80                              LDS        USTACK           . GET USER'S STACK
+
+00757                          *
+00758                          *    MOVE STACK DOWN 2 PLACES
+00759                          *
+00760   FBC2 34                                 DES                         . MAKE ROOM ON STACK FOR ADDRESS OF PART #2
+00761   FBC3 34                                 DES                         
+00762   FBC4 30                                 TSX                         . POINT AT DATA ON STACK
+00763   FBC5 C6 07                              LDAB       #7               . 7 BYTES TO MOVE
+00764   FBC7 A6 02             GO$SBL           LDAA       2,X              . GET A BYTE
+00765   FBC9 A7 00                              STAA       0,X              
+00766   FBCB 08                                 INX                         
+00767   FBCC 5A                                 DECB                        
+00768   FBCD 26 F8                              BNE        GO$SBL           
+00769   FBCF CE FB E7                           LDX        #GO$SB2          . POINT AT PART #2
+00770   FBD2 DF B1                              STX        TMP$00           
+00771   FBD4 30                                 TSX                         
+00772   FBD5 D6 B1                              LDAB       TMP$00           . POINT AT PART #2 (MSB)
+00773   FBD7 96 B2                              LDAA       TMP$00+1         . (LSB)
+00774   FBD9 E7 07                              STAB       7,X              . SET 'RETURN' ADDRESS
+00775   FBDB A7 08                              STAA       8,X              
+00776   FBDD D6 97                              LDAB       VALUE            . USER'S ADDRESS
+00777   FBDF 96 98                              LDAA       VALUE+1          
+00778   FBE1 E7 05                              STAB       5,X              . SET 'PC'
+00779   FBE3 A7 06                              STAA       6,X              
+00780   FBE5 20 D0                              BRA        GOU$DO           
+
+00782                          *
+00783                          *     SUB-ROUTINE PART #2
+00784                          *
+00785   FBE7 3F                GO$SB2           SWI                         . CAUSE A BREAKPOINT CHECK
+00786   FBE8                   SUB$RK           EQU        *                
+
+00788                          *
+00789                          *    PART THREE OF SUB-ROUTINE CALL
+00790                          *
+00791   FBE8 9F 80             GO$SB3           STS        USTACK           . RESTORE USER'S STACK
+00792   FBEA 30                                 TSX                         
+00793   FBEB 8E 00 FF                           LDS        #STACK           . GET THE DEBUG STACK
+00794   FBEE D6 97                              LDAB       VALUE            
+00795   FBF0 96 98                              LDAA       VALUE+1          
+00796   FBF2 E7 05                              STAB       5,X              . PUT CALLED ADDRESS IN PC
+00797   FBF4 A7 06                              STAA       6,X              
+00798   FBF6 BD FA 13                           JSR        DSPRTS           
+00799   FBF9 BD FC B9                           JSR        CLRBRK           . GO RESET THE BREAK POINTS
+00800   FBFC 7E F9 32                           JMP        MON$             
+
+00802                          *
+00803                          *      CAN'T DO IT
+00804                          *
+00805   FBFF 8E 00 FF          GO$BAD           LDS        #STACK           . RESET DEBUG STACK
+00806   FC02 BD F9 58                           JSR        WHATER           . CANT DO IT
+00807   FC05 7E F9 32                           JMP        MON$             
+
+00809                          *
+00810                          *     CONTINUE WITH USER'S PROGRAM
+00811                          *
+00812   FC08 DE 80             GO$CON           LDX        USTACK           
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0015
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+00813   FC0A EE 06                              LDX        6,X              . GET USER'S PC
+00814   FC0C 7C 00 96                           INC        VFLAG            . SET THE FLAG
+00815   FC0F DF 97                              STX        VALUE            . SET PC
+00816   FC11 7E FB A7                           JMP        GO$USR           . GO TO USER'S PROGRAM
+
+00818                          *
+00819                          *     SET/DISPLAY THE OFFSET
+00820                          *
+00821   FC14 7D 00 96          OFS$RT           TST        VFLAG            . SET OR DISPLAY
+00822   FC17 27 05                              BEQ        OFS$DS           . DISPLAY
+00823   FC19 DE 97                              LDX        VALUE            . GET THE NEW OFFSET
+00824   FC1B DF A9                              STX        OFFSET           
+00825   FC1D 39                                 RTS                         
+
+00827                          *
+00828   FC1E 86 3D             OFS$DS           LDAA       #'=              . SEND AN EQUAL SIGN
+00829   FC20 BD F9 F0                           JSR        OUTCH            
+00830   FC23 CE 00 A9                           LDX        #OFFSET          . POINT AT THE OFFSET VALUE
+00831   FC26 7E FA 6D                           JMP        OUT4HS           
+
+00833                          *
+00834                          *      SET/DISPLAY BREAK-POINTS
+00835                          *
+00836   FC29 7D 00 96          SBKRTN           TST        VFLAG            . SEE IF DISPLAY OR SET
+00837   FC2C 27 1F                              BEQ        BK$DSP           
+
+00839                          *
+00840                          *      SET A BREAK POINT
+00841                          *
+00842   FC2E CE 00 99                           LDX        #BRKPTS          . FIND EMPTY BREAK POINT AREA
+00843   FC31 C6 03                              LDAB       #3               . 3 PLACES TO CHECK
+00844   FC33 A6 00             BRK$L0           LDAA       0,X              . SEE IF EMPTY
+00845   FC35 AA 01                              ORAA       1,X              
+00846   FC37 27 07                              BEQ        BRK$00           
+00847   FC39 08                                 INX                         . MOVE TO NEXT PLACE
+00848   FC3A 08                                 INX                         
+00849   FC3B 08                                 INX                         
+00850   FC3C 08                                 INX                         
+00851   FC3D 5A                                 DECB                        
+00852   FC3E 26 F3                              BNE        BRK$L0           
+
+00854                          *
+00855   FC40 D6 97             BRK$00           LDAB       VALUE            . POINT AT ADDRESS OF BREAK POINT
+00856   FC42 96 98                              LDAA       VALUE+1          
+00857   FC44 E7 00                              STAB       0,X              . SAVE THIS AREA
+00858   FC46 A7 01                              STAA       1,X              
+00859   FC48 6F 02                              CLR        2,X              
+00860   FC4A 6F 03                              CLR        3,X              
+00861   FC4C 39                                 RTS                         
+
+00863                          *
+00864                          *     DISPLAY THE BREAK POINTS
+00865                          *
+00866   FC4D CE F8 92          BK$DSP           LDX        #BRKSTG          . SEND THE STRING MESSAGE
+00867   FC50 BD F9 FB                           JSR        PDATA            
+00868   FC53 CE 00 99                           LDX        #BRKPTS          . POINT AT THE BREAK POINT ADDRESSES
+00869   FC56 C6 04                              LDAB       #4               . 4 TO DISPLAY
+
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0016
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+00871                          *
+00872   FC58 BD FA 6D          BK$DL0           JSR        OUT4HS           . PRINT THE ADDRESS
+00873   FC5B 08                                 INX                         
+00874   FC5C 08                                 INX                         
+00875   FC5D 5A                                 DECB                        
+00876   FC5E 26 F8                              BNE        BK$DL0           
+00877   FC60 39                                 RTS                         
+
+00879                          *
+00880                          *     CLEAR BREAK POINTS
+00881                          *
+00882   FC61 7D 00 96          CBKRTN           TST        VFLAG            . DO ALL OR ONE?
+00883   FC64 27 26                              BEQ        CBK$AL           . ALL
+
+00885                          *
+00886                          *     SEARCH FOR BREAK POINT ADDRESS
+00887                          *
+00888   FC66 CE 00 99                           LDX        #BRKPTS          . POINT AT THE TABLE
+00889   FC69 C6 04                              LDAB       #4               . 4 PLACES TO CHECK
+00890   FC6B 97 B1                              STAA       TMP$00           
+00891   FC6D D6 97                              LDAB       VALUE            
+00892   FC6F 96 98                              LDAA       VALUE+1          
+00893   FC71 E1 00             CBK$L0           CMPB       0,X              . CHECK MSB
+00894   FC73 26 04                              BNE        CBK$NX           . NOT THIS ONE
+00895   FC75 A1 01                              CMPA       1,X              . CHECK LSB
+00896   FC77 27 0A                              BEQ        CBK$CL           . CLEAR THIS LOCATION
+00897   FC79 08                CBK$NX           INX                         . MOVE TO NEXT LOCATION
+00898   FC7A 08                                 INX                         
+00899   FC7B 08                                 INX                         
+00900   FC7C 08                                 INX                         
+00901   FC7D 7A 00 B1                           DEC        TMP$00           . DECR. COUNTER
+00902   FC80 26 EF                              BNE        CBK$L0           
+00903   FC82 39                                 RTS                         
+
+00905                          *
+00906   FC83 6F 00             CBK$CL           CLR        0,X              . CLEAR THIS LOCATION
+00907   FC85 6F 01                              CLR        1,X              
+00908   FC87 6F 02                              CLR        2,X              
+00909   FC89 6F 03                              CLR        3,X              
+00910   FC8B 39                                 RTS                         
+
+00912                          *
+00913                          *     CLEAR ALL BREAK POINTS
+00914                          *
+00915   FC8C CE 00 99          CBK$AL           LDX        #BRKPTS          . POINT AT TABLE
+00916   FC8F C6 10                              LDAB       #4*4             . 4 SETS
+00917   FC91 6F 00             CBK$L1           CLR        0,X              
+00918   FC93 08                                 INX                         
+00919   FC94 5A                                 DECB                        
+00920   FC95 26 FA                              BNE        CBK$L1           
+00921   FC97 39                                 RTS                         
+
+00923                          *
+00924                          *       SET BREAK POINTS IN MEMORY
+00925                          *
+00926   FC98 CE 00 99          SETBRK           LDX        #BRKPTS          . POINT AT BREAK POINT TABLE
+00927   FC9B C6 04                              LDAB       #4               
+00928   FC9D DF B7             SET$B0           STX        TMP$03           . SAVE THE POINTER
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0017
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+00929   FC9F EE 00                              LDX        0,X              . GET ADDRESS
+00930   FCA1 27 0C                              BEQ        SET$NX           . DO NEXT
+00931   FCA3 A6 00                              LDAA       0,X              . GET THE BYTE
+00932   FCA5 DE B7                              LDX        TMP$03           . RESTORE THE POINTER
+00933   FCA7 A7 02                              STAA       2,X              . SAVE IT
+00934   FCA9 EE 00                              LDX        0,X              . POINT AT ADDRESS AGAIN
+00935   FCAB 86 3F                              LDAA       #$3F             . SET BREAK POINT IN THIS LOCATION
+00936   FCAD A7 00                              STAA       0,X              
+00937   FCAF DE B7             SET$NX           LDX        TMP$03           . MOVE TO NEXT LOCATION
+00938   FCB1 08                                 INX                         
+00939   FCB2 08                                 INX                         
+00940   FCB3 08                                 INX                         
+00941   FCB4 08                                 INX                         
+00942   FCB5 5A                                 DECB                        
+00943   FCB6 26 E5                              BNE        SET$B0           
+00944   FCB8 39                                 RTS                         
+
+00946                          *
+00947                          *     RESTORE THE BREAK POINT VALUES
+00948                          *
+00949   FCB9 CE 00 99          CLRBRK           LDX        #BRKPTS          . POINT AT TABLE
+00950   FCBC C6 04                              LDAB       #4               
+00951   FCBE DF B7             CLR$B0           STX        TMP$03           . SAVE THE POINTER
+00952   FCC0 A6 02                              LDAA       2,X              . GET THE OPCODE
+00953   FCC2 EE 00                              LDX        0,X              . POINT AT THE OPCODE ADDRESS
+00954   FCC4 27 02                              BEQ        CLR$NY           
+00955   FCC6 A7 00                              STAA       0,X              . RESTORE IT
+00956   FCC8 DE B7             CLR$NY           LDX        TMP$03           . MOVE TO NEXT LOCATION
+00957   FCCA 08                                 INX                         
+00958   FCCB 08                                 INX                         
+00959   FCCC 08                                 INX                         
+00960   FCCD 08                                 INX                         
+00961   FCCE 5A                                 DECB                        
+00962   FCCF 26 ED                              BNE        CLR$B0           
+00963   FCD1 39                                 RTS                         
+
+00965                          *
+00966                          *     GET BEGIN AND END ADDRESSES
+00967                          *
+00968   FCD2 CE F8 3E          BEGEND           LDX        #BEGMSG          . SEND THE QUESTION
+00969   FCD5 BD FC E7                           JSR        BEGVAL           . GET A VALUE AND A CHAR.
+00970   FCD8 26 1B                              BNE        BEGEXT           . NO
+00971   FCDA DF AD                              STX        BEGADR           . SAVE THE VALUE
+00972   FCDC CE F8 4A                           LDX        #ENDMSG          . SEND THE QUESTION
+00973   FCDF 8D 06                              BSR        BEGVAL           . GET THE VALUE
+00974   FCE1 26 12                              BNE        BEGEXT           . NO
+00975   FCE3 DF AF                              STX        ENDADR           . SAVE THE 'END' ADDRESS
+00976   FCE5 0C                                 CLC                         
+00977   FCE6 39                                 RTS                         
+
+00979                          *
+00980                          *   SEND STRING AND GET THE VALUE
+00981                          *
+00982   FCE7 BD F9 FB          BEGVAL           JSR        PDATA            . SEND STRING TO DISPLAY
+00983   FCEA CE FE 72                           LDX        #DUMTBL          . POINT AT DUMMY TABLE
+00984   FCED BD F9 61                           JSR        GETCMD           . GET A VALUE
+00985   FCF0 DE 97                              LDX        VALUE            
+00986   FCF2 81 0D                              CMPA       #CR              . SEE IF GOOD VALUE
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0018
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+00987   FCF4 39                                 RTS                         
+
+00989                          *
+00990                          *   ERROR EXIT FROM BEGEND ROUTINE
+00991                          *
+00992   FCF5 0D                BEGEXT           SEC                         
+00993   FCF6 39                                 RTS                         
+
+00995                          *
+00996                          *     FILL MEMORY FROM XXXX TO YYYY WITH ZZ
+00997                          *
+00998   FCF7 96 98             FILMEM           LDAA       VALUE+1          . GET THE FILL VALUE
+00999   FCF9 36                                 PSHA                        . SAVE IT
+01000   FCFA 8D D6                              BSR        BEGEND           . GET THE ADDRESSES
+01001   FCFC 25 27                              BCS        FIL$EX           . FORGET IT
+01002   FCFE D6 A9                              LDAB       OFFSET           . ADD THE OFFSET
+01003   FD00 96 AA                              LDAA       OFFSET+1         
+01004   FD02 9B B0                              ADDA       ENDADR+1         . SET THE FROM ADDRESS
+01005   FD04 D9 AF                              ADCB       ENDADR           
+01006   FD06 8B 01                              ADDA       #1               . SET STOP ADDRESS
+01007   FD08 C9 00                              ADCB       #0               
+01008   FD0A D7 AF                              STAB       ENDADR           
+01009   FD0C 97 B0                              STAA       ENDADR+1         
+01010   FD0E D6 A9                              LDAB       OFFSET           
+01011   FD10 96 AA                              LDAA       OFFSET+1         
+01012   FD12 9B AE                              ADDA       BEGADR+1         . SET THE TO ADDRESS
+01013   FD14 D9 AD                              ADCB       BEGADR           
+01014   FD16 D7 AD                              STAB       BEGADR           
+01015   FD18 97 AE                              STAA       BEGADR+1         
+01016   FD1A 32                                 PULA                        . GET FILL CHAR.
+01017   FD1B DE AD                              LDX        BEGADR           . GET 'FROM' ADDRESS
+
+01019                          *
+01020   FD1D A7 00             FIL$L0           STAA       0,X              . STORE THE BYTE
+01021   FD1F 08                                 INX                         
+01022   FD20 9C AF                              CPX        ENDADR           . DONE?
+01023   FD22 26 F9                              BNE        FIL$L0           . NO
+01024   FD24 39                                 RTS                         
+
+01026                          *
+01027   FD25 32                FIL$EX           PULA                        . RESTORE THE STACK
+01028   FD26 39                                 RTS                         
+
+01030                          *
+01031                          *     COMPARE MEMORY FROM XXXX TO YYYY WITH ZZ
+01032                          *
+01033   FD27 96 98             CMPMEM           LDAA       VALUE+1          . GET THE COMPARE VALUE
+01034   FD29 36                                 PSHA                        . SAVE IT
+01035   FD2A 8D A6                              BSR        BEGEND           . GET THE ADDRESSES
+01036   FD2C 25 41                              BCS        CMP$EX           . FORGET IT
+01037   FD2E D6 A9                              LDAB       OFFSET           . ADD THE OFFSET
+01038   FD30 96 AA                              LDAA       OFFSET+1         
+01039   FD32 9B B0                              ADDA       ENDADR+1         . SET THE FROM ADDRESS
+01040   FD34 D9 AF                              ADCB       ENDADR           
+01041   FD36 8B 01                              ADDA       #1               . SET STOP ADDRESS
+01042   FD38 C9 00                              ADCB       #0               
+01043   FD3A D7 AF                              STAB       ENDADR           
+01044   FD3C 97 B0                              STAA       ENDADR+1         
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0019
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+01045   FD3E D6 A9                              LDAB       OFFSET           
+01046   FD40 96 AA                              LDAA       OFFSET+1         
+01047   FD42 9B AE                              ADDA       BEGADR+1         . SET THE TO ADDRESS
+01048   FD44 D9 AD                              ADCB       BEGADR           
+01049   FD46 D7 AD                              STAB       BEGADR           
+01050   FD48 97 AE                              STAA       BEGADR+1         
+01051   FD4A 32                                 PULA                        . GET COMPARE CHAR.
+01052   FD4B DE AD                              LDX        BEGADR           . GET 'FROM' ADDRESS
+
+01054                          *
+01055   FD4D E6 00             CMP$L0           LDAB       0,X              . GET THE BYTE
+01056   FD4F 11                                 CBA                         . COMPARE THE BYTES
+01057   FD50 27 17                              BEQ        CMP$NX           . DATA COMPARED, MOVE ON
+
+01059                          *
+01060                          *    SEND AN ERROR MESSAGE
+01061                          *
+01062   FD52 DF B1             CMP$ER           STX        TMP$00           . SAVE THE ADDRESS
+01063   FD54 D7 B3                              STAB       TMP$01           . SAVE IT
+01064   FD56 36                                 PSHA                        . SAVE THE COMPARE VALUE
+01065   FD57 CE F8 65                           LDX        #CMPMSG          . SEND THE MESSAGE
+01066   FD5A BD F9 FB                           JSR        PDATA            
+01067   FD5D CE 00 B1                           LDX        #TMP$00          . POINT AT THE ADDRESS
+01068   FD60 BD FA 6D                           JSR        OUT4HS           . SEND THE ADDRESS
+01069   FD63 BD FA 6F                           JSR        OUT2HS           . SEND THE BAD DATA
+01070   FD66 DE B1                              LDX        TMP$00           . GET THE POINTER
+01071   FD68 32                                 PULA                        . RESTORE THE COMPARE VALUE
+
+01073                          *
+01074   FD69 08                CMP$NX           INX                         . MOVE TO NEXT LOCATION
+01075   FD6A 9C AF                              CPX        ENDADR           . DONE?
+01076   FD6C 26 DF                              BNE        CMP$L0           . NO
+01077   FD6E 39                                 RTS                         
+
+01079                          *
+01080   FD6F 32                CMP$EX           PULA                        . RESTORE THE STACK
+01081   FD70 39                                 RTS                         
+
+01083                          *
+01084                          *    MOVE DATA FROM XXXX TO YYYY
+01085                          *
+01086   FD71 DE 97             MOVMEM           LDX        VALUE            . GET DESTINATION
+01087   FD73 DF B1                              STX        TMP$00           SAVE IT
+01088   FD75 7D 00 96                           TST        VFLAG            . WAS A VALUE ENTERED?
+01089   FD78 27 1E                              BEQ        MOVEXT           . NO
+01090   FD7A BD FC D2                           JSR        BEGEND           . GET ADDRESSES
+01091   FD7D 25 19                              BCS        MOVEXT           . FORGET IT
+01092   FD7F DE AF                              LDX        ENDADR           
+01093   FD81 08                                 INX                         . BUMP ADDRESS FOR COMPARISON
+01094   FD82 DF AF                              STX        ENDADR           
+01095   FD84 DE AD                              LDX        BEGADR           . GET 'FROM' ADDRESS
+
+01097                          *
+01098   FD86 A6 00             MOVLP0           LDAA       0,X              . GET A BYTE
+01099   FD88 08                                 INX                         
+01100   FD89 DF AD                              STX        BEGADR           
+01101   FD8B DE B1                              LDX        TMP$00           . GET DESTINATION ADDRESS
+01102   FD8D A7 00                              STAA       0,X              . STORE IT
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0020
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+01103   FD8F 08                                 INX                         
+01104   FD90 DF B1                              STX        TMP$00           
+01105   FD92 DE AD                              LDX        BEGADR           . FROM ADDRESS
+01106   FD94 9C AF                              CPX        ENDADR           . DONE?
+01107   FD96 26 EE                              BNE        MOVLP0           . NO
+01108   FD98 39                MOVEXT           RTS                         
+
+01110                          *
+01111                          *    SET/RESET/PRINT IRQ FLAG
+01112                          *
+01113   FD99 7D 00 96          IRQ$RT           TST        VFLAG            . SET/RESET OR PRINT
+01114   FD9C 27 07                              BEQ        PRTIRQ           . PRINT IT
+01115   FD9E 96 98                              LDAA       VALUE+1          . GET THE VALUE
+01116   FDA0 84 01                              ANDA       #%1              . SAVE THE BIT 0 ONLY
+01117   FDA2 97 95                              STAA       IRQFLG           
+01118   FDA4 39                                 RTS                         
+
+01120                          *
+01121                          *    PRINT THE FLAG
+01122                          *
+01123   FDA5 86 3D             PRTIRQ           LDAA       #'=              . SEND AN EQUAL SIGN
+01124   FDA7 BD F9 F0                           JSR        OUTCH            
+01125   FDAA CE 00 95                           LDX        #IRQFLG          . POINT AT THE FLAG
+01126   FDAD 7E FA 76                           JMP        OUT2H            
+
+01128                          *
+01129                          *     CHECK FOR OPERATOR INTERVENTION
+01130                          *
+01131   FDB0 96 10             CKBRK            LDAA       ACSTAT           . CHECK FOR CHARACTER
+01132   FDB2 85 01                              BITA       #RDRF            . RDRF TRUE?
+01133   FDB4 27 12                              BEQ        CKBRKN           . NOT YET
+01134   FDB6 97 92                              STAA       AECHO            . NO ECHO
+01135   FDB8 BD F9 DE                           JSR        INCHNP           . GET THE CHARACTER
+01136   FDBB 81 17             CKBRKL           CMPA       #$17             . <CNTRL-W>
+01137   FDBD 26 09                              BNE        CKBRKN           . NO
+
+01139                          *
+01140                          *    WAIT FOR ANOTHER CHARACTER
+01141                          *
+01142   FDBF BD F9 DE          CKBKL            JSR        INCHNP           . WAIT FOR ANOTHER CHARACTER
+01143   FDC2 81 18                              CMPA       #$18             . <CNTRL-X>
+01144   FDC4 26 F5                              BNE        CKBRKL           . DONT ABORT YET
+01145   FDC6 0D                                 SEC                         
+01146   FDC7 39                                 RTS                         
+
+01148                          *
+01149                          *    NO INTERVENTION
+01150                          *
+01151   FDC8 7F 00 92          CKBRKN           CLR        AECHO            . CLEAR THE ECHO FLAG
+01152   FDCB 39                                 RTS                         
+
+01154                          *
+01155                          *    DISPLAY MEMORY LOCATIONS
+01156                          *
+01157   FDCC BD FC D2          DSPMEM           JSR        BEGEND           . GET THE BEG-END ADDRESSES
+01158   FDCF 24 03                              BCC        DMP$00           . OK TO DUMP
+01159   FDD1 7E FE 43                           JMP        DMP$EX           . EXIT
+
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0021
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+01161                          *
+01162                          *    DUMP THE MEMORY
+01163                          *
+01164   FDD4 D6 AD             DMP$00           LDAB       BEGADR           . SET ON EVEN BOUNDRY
+01165   FDD6 96 AE                              LDAA       BEGADR+1         
+01166   FDD8 84 F0                              ANDA       #%11110000       . ZERO OUT LSN
+01167   FDDA 9B AA                              ADDA       OFFSET+1         . ADD THE OFFSET
+01168   FDDC D9 A9                              ADCB       OFFSET           
+01169   FDDE D7 AD                              STAB       BEGADR           
+01170   FDE0 97 AE                              STAA       BEGADR+1         
+01171   FDE2 D6 AF                              LDAB       ENDADR           
+01172   FDE4 96 B0                              LDAA       ENDADR+1         
+01173   FDE6 8A 0F                              ORAA       #%1111           . END ON EVEN 16
+01174   FDE8 9B AA                              ADDA       OFFSET+1         . ADD THE OFFSET
+01175   FDEA D9 A9                              ADCB       OFFSET           
+01176   FDEC 8B 01                              ADDA       #1               . AND ADD 1
+01177   FDEE C9 00                              ADCB       #0               
+01178   FDF0 D7 AF                              STAB       ENDADR           
+01179   FDF2 97 B0                              STAA       ENDADR+1         
+
+01181                          *
+01182                          *     MAKE ROOM FOR ASCII DATA ON STACK
+01183                          *
+01184   FDF4 C6 11                              LDAB       #17              . 17 PLACES
+01185   FDF6 34                DM$PL0           DES                         
+01186   FDF7 5A                                 DECB                        
+01187   FDF8 26 FC                              BNE        DM$PL0           
+
+01189                          *
+01190                          *     RESET ASCII BUFFER
+01191                          *
+01192   FDFA 8D B4             DMP$L0           BSR        CKBRK            . CHECK FOR USER INTERVENTION
+01193   FDFC 25 3F                              BCS        DMP$BK           . EXIT THE PROGRAM
+01194   FDFE 30                                 TSX                         . POINT AT THE ASCII BUFFER
+01195   FDFF DF B1                              STX        TMP$00           . RESET THE POINTER
+
+01197                          *
+01198                          *     OUTPUT MEMORY DATA
+01199                          *
+01200   FE01 CE 00 AD          DMP$L2           LDX        #BEGADR          . POINT AT DATA ADDRESS
+01201   FE04 BD FA 09                           JSR        PCRLF            . NEW LINE
+01202   FE07 BD FA 6D                           JSR        OUT4HS           . PRINT ADDRESS
+01203   FE0A C6 10                              LDAB       #16              . 16 BYTES TO PRINT
+01204   FE0C DE AD                              LDX        BEGADR           . POINT AT THE DATA
+
+01206                          *
+01207   FE0E A6 00             DMP$L3           LDAA       0,X              . GET THE BYTE
+01208   FE10 DF AD                              STX        BEGADR           
+01209   FE12 81 7F                              CMPA       #$7F             . SEE IF ASCII
+01210   FE14 22 04                              BHI        DMP$NA           . NOT ASCII
+01211   FE16 81 1F                              CMPA       #SPACE-1         
+01212   FE18 22 02                              BHI        DMP$IA           . IT IS ASCII
+01213   FE1A 86 2E             DMP$NA           LDAA       #'.              . SET TO ASCII <.>
+01214   FE1C DE B1             DMP$IA           LDX        TMP$00           . STORE OUT THE CHAR.
+01215   FE1E A7 00                              STAA       0,X              
+01216   FE20 08                                 INX                         
+01217   FE21 DF B1                              STX        TMP$00           
+01218   FE23 DE AD                              LDX        BEGADR           . POINT AT THE DATA AGAIN
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0022
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+01219   FE25 BD FA 6F                           JSR        OUT2HS           
+01220   FE28 5A                                 DECB                        
+01221   FE29 26 E3                              BNE        DMP$L3           
+
+01223                          *
+01224                          *     PRINT ASCII DATA
+01225                          *
+01226   FE2B DF AD                              STX        BEGADR           . SAVE POINTER
+01227   FE2D DE B1                              LDX        TMP$00           . SET END OF STRING
+01228   FE2F 86 04                              LDAA       #4               
+01229   FE31 A7 00                              STAA       0,X              
+01230   FE33 30                                 TSX                         . POINT AT DATA
+01231   FE34 BD F9 FD                           JSR        PDATA1           . PRINT THE STRING
+01232   FE37 DE AD                              LDX        BEGADR           . POINT AT THE DATA
+01233   FE39 9C AF                              CPX        ENDADR           . ARE WE DONE?
+01234   FE3B 26 BD                              BNE        DMP$L0           
+01235   FE3D C6 11             DMP$BK           LDAB       #17              . RESTORE THE STACK
+01236   FE3F 31                DMP$L4           INS                         
+01237   FE40 5A                                 DECB                        
+01238   FE41 26 FC                              BNE        DMP$L4           
+01239   FE43 39                DMP$EX           RTS                         
+
+01241                          *
+01242                          *     'S1' RECORD LOADER
+01243                          *
+01244   FE44 86 11             LOAD             LDAA       #$11             . SEND DEVICE ON
+01245   FE46 97 92                              STAA       AECHO            . TURN OFF ECHO
+01246   FE48 BD F9 F0                           JSR        OUTCH            
+
+01248                          *
+01249                          *     MAKE ROOM ON THE STACK FOR HEADER
+01250                          *
+01251   FE4B C6 1A                              LDAB       #26              
+01252   FE4D 34                LOD$L0           DES                         
+01253   FE4E 5A                                 DECB                        
+01254   FE4F 26 FC                              BNE        LOD$L0           
+01255   FE51 86 04                              LDAA       #4               . SET END OF RECORD
+01256   FE53 30                                 TSX                         
+01257   FE54 A7 00                              STAA       0,X              
+
+01259                          *
+01260                          *     WAIT FOR RECORD INDICATOR
+01261                          *
+01262   FE56 BD F9 DE          LOAD00           JSR        INCHNP           . GET A BYTE
+01263   FE59 81 53                              CMPA       #'S              . IS IT AN 'S'
+01264   FE5B 26 F9                              BNE        LOAD00           . NO
+
+01266                          *
+01267                          *     WAIT FOR RECORD TYPE
+01268                          *
+01269   FE5D CE FE 69                           LDX        #RECTYP          . POINT AT THE RECORD TABLE
+01270   FE60 BD F9 78                           JSR        CHKCMD           . PROCESS IT
+01271   FE63 25 F1                              BCS        LOAD00           . NOT A GOOD
+01272   FE65 EE 01                              LDX        1,X              . GET TASK ADDRESS
+01273   FE67 6E 00                              JMP        0,X              . JUMP TO IT!
+
+01275                          *
+01276                          *     RECORD TYPE TABLE
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0023
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+01277                          *
+01278   FE69 30                RECTYP           FCB        '0               . HEADER RECORD
+01279   FE6A FE A7                              FDB        LOADHD           
+01280   FE6C 31                                 FCB        '1               . DATA RECORD
+01281   FE6D FE C4                              FDB        LOADRC           
+01282   FE6F 39                                 FCB        '9               . END OF FILE RECORD
+01283   FE70 FE 73                              FDB        LOADED           
+01284   FE72 00                DUMTBL           FCB        0                . TERMINATOR
+
+01286                          *
+01287                          *      LOAD THE END OF RECORD
+01288                          *
+01289   FE73 BD FE ED          LOADED           JSR        LD$SET           . GET THE SETUP 
+01290   FE76 BD FA 9E                           JSR        IN2HEX           . GET THE CHECKSUM
+01291   FE79 7A 00 93                           DEC        BYTECT           . SEE IF LEGAL
+01292   FE7C 26 11                              BNE        LD$EDE           . NOT LEGAL START ADDRESS
+01293   FE7E 7C 00 94                           INC        CHKSUM           
+01294   FE81 26 0C                              BNE        LD$EDE           . ILLEGAL ADDRESS
+01295   FE83 DF B1                              STX        TMP$00           
+01296   FE85 DE 80                              LDX        USTACK           . PUT START ADDRESS IN USER'S PC
+01297   FE87 D6 B1                              LDAB       TMP$00           
+01298   FE89 96 B2                              LDAA       TMP$00+1         
+01299   FE8B E7 06                              STAB       6,X              
+01300   FE8D A7 07                              STAA       7,X              
+01301   FE8F 86 13             LD$EDE           LDAA       #$13             . TURN OFF READER
+01302   FE91 BD F9 F0                           JSR        OUTCH            
+01303   FE94 CE 00 00                           LDX        #0               . DELAY SOME
+01304   FE97 09                LOD$L1           DEX                         
+01305   FE98 26 FD                              BNE        LOD$L1           
+01306   FE9A 30                                 TSX                         . POINT AT THE HEADER
+01307   FE9B BD F9 FB                           JSR        PDATA            
+01308   FE9E C6 1A             LOD$EX           LDAB       #26              . RESTORE THE STACK
+01309   FEA0 31                LOD$L2           INS                         
+01310   FEA1 5A                                 DECB                        
+01311   FEA2 26 FC                              BNE        LOD$L2           
+01312   FEA4 7E F9 32                           JMP        MON$             
+
+01314                          *
+01315                          *     LOAD THE HEADER
+01316                          *
+01317   FEA7 BD FE ED          LOADHD           JSR        LD$SET           . SET-UP LOAD
+01318   FEAA D6 93                              LDAB       BYTECT           . CHECK BYTE COUNT
+01319   FEAC C1 19                              CMPB       #25              
+01320   FEAE 22 A6                              BHI        LOAD00           . FORGET IT
+01321   FEB0 30                                 TSX                         . POINT AT THE STACK
+
+01323                          *
+01324                          *     READ IN THE HEADER
+01325                          *
+01326   FEB1 BD FA 9E          LD$HD0           JSR        IN2HEX           . GET A CHAR.
+01327   FEB4 A7 00                              STAA       0,X              . STORE IT
+01328   FEB6 08                                 INX                         
+01329   FEB7 7A 00 93                           DEC        BYTECT           . DONE?
+01330   FEBA 26 F5                              BNE        LD$HD0           
+01331   FEBC 09                                 DEX                         . BACK-UP 1 BYTE
+01332   FEBD 86 04                              LDAA       #4               . SET E.O.T.
+01333   FEBF A7 00                              STAA       0,X              
+01334   FEC1 7E FE 56                           JMP        LOAD00           . CONTINUE THE LOAD
+
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0024
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+01336                          *
+01337                          *     LOAD A RECORD
+01338                          *
+01339   FEC4 BD FE ED          LOADRC           JSR        LD$SET           . GET SETUP
+01340   FEC7 BD FA 9E          LOADR0           JSR        IN2HEX           . GET A BYTE
+01341   FECA 7A 00 93                           DEC        BYTECT           . DONE?
+01342   FECD 27 16                              BEQ        LD$CHK           
+01343   FECF A7 00                              STAA       0,X              
+01344   FED1 A1 00                              CMPA       0,X              
+01345   FED3 26 03                              BNE        MEMER$           
+01346   FED5 08                                 INX                         
+01347   FED6 20 EF                              BRA        LOADR0           
+
+01349                          *
+01350                          *    ERRORS DURING LOAD
+01351                          *
+01352   FED8 CE F8 56          MEMER$           LDX        #MEMERR          . MEMORY NO-CHANGE
+01353   FEDB 20 03                              BRA        LERR$R           
+
+01355                          *
+01356   FEDD CE F8 73          CHKER$           LDX        #CHKERR          . CHECK-SUM ERROR
+01357   FEE0 BD F9 FB          LERR$R           JSR        PDATA            
+01358   FEE3 20 B9                              BRA        LOD$EX           
+
+01360                          *
+01361                          *    CHECK FOR PROPER SUM
+01362                          *
+01363   FEE5 7C 00 94          LD$CHK           INC        CHKSUM           
+01364   FEE8 26 F3                              BNE        CHKER$           
+01365   FEEA 7E FE 56                           JMP        LOAD00           
+
+01367                          *
+01368                          *     RECORD SET-UP
+01369                          *
+01370   FEED 7F 00 94          LD$SET           CLR        CHKSUM           . ZERO CHECK SUM
+01371   FEF0 BD FA 9E                           JSR        IN2HEX           . GET BYTE COUNT
+01372   FEF3 25 0A                              BCS        STP$LD           . STOP LOADER
+01373   FEF5 80 02                              SUBA       #2               . REMOVE ADDRESS
+01374   FEF7 97 93                              STAA       BYTECT           . SAVE THE COUNT
+01375   FEF9 BD FA 8E                           JSR        IN4HEX           . GET LOAD ADDRESS
+01376   FEFC 25 01                              BCS        STP$LD           
+01377   FEFE 39                                 RTS                         
+
+01379                          *
+01380                          *     STOP LOADER
+01381                          *
+01382   FEFF CE F8 84          STP$LD           LDX        #LOADER          
+01383   FF02 BD F9 FD                           JSR        PDATA1           
+01384   FF05 20 97                              BRA        LOD$EX           
+
+01386                          *
+01387                          *     SWI ENTRY POINT
+01388                          *
+01389   FF07 30                SWI1             TSX                         . GET THE P.C.
+01390   FF08 EE 05                              LDX        5,X              
+01391   FF0A 8C FB E8                           CPX        #SUB$RK          
+01392   FF0D 26 03                              BNE        NOT$SB           . NOT SUB-ROUTINE CALL
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0025
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+01393   FF0F 7E FB E8                           JMP        GO$SB3           . WAS SUB-ROUTINE CALL
+
+01395                          *
+01396                          *    GET ADDRESS OF SWI
+01397                          *
+01398   FF12 30                NOT$SB           TSX                         
+01399   FF13 C6 04                              LDAB       #4               . 4 PLACES TO LOOK
+01400   FF15 D7 B1                              STAB       TMP$00           
+01401   FF17 E6 05                              LDAB       5,X              . GET PC
+01402   FF19 A6 06                              LDAA       6,X              
+01403   FF1B 80 01                              SUBA       #1               . POINT AT THE 'SWI'
+01404   FF1D C2 00                              SBCB       #0               
+01405   FF1F CE 00 99                           LDX        #BRKPTS          . POINT AT THE TABLE
+
+01407                          *
+01408                          *     CHECK TABLE AGAINST PC-1
+01409                          *
+01410   FF22 E1 00             BP$LOP           CMPB       0,X              . IS THIS THE ADDRESS
+01411   FF24 26 04                              BNE        BP$NXT           
+01412   FF26 A1 01                              CMPA       1,X              . LSB
+01413   FF28 27 0B                              BEQ        BP$FND           . YES
+01414   FF2A 08                BP$NXT           INX                         . MOVE TO NEXT LOCATION
+01415   FF2B 08                                 INX                         
+01416   FF2C 08                                 INX                         
+01417   FF2D 08                                 INX                         
+01418   FF2E 7A 00 B1                           DEC        TMP$00           
+01419   FF31 26 EF                              BNE        BP$LOP           
+01420   FF33 20 60                              BRA        SWIX             . GO TO USER'S 'SWI'
+
+01422                          *
+01423                          *   IF HERE, WE FOUND A BREAK-POINT
+01424                          *
+01425   FF35 30                BP$FND           TSX                         
+01426   FF36 E7 05                              STAB       5,X              . PUT NEW PC ON STACK
+01427   FF38 A7 06                              STAA       6,X              
+01428   FF3A 9F 80                              STS        USTACK           . SAVE USER'S STACK
+01429   FF3C CE 00 FF                           LDX        #STACK           . GET THE DEBUG STACK
+01430   FF3F BD FC B9                           JSR        CLRBRK           . RESTORE THE BREAK POINTS
+01431   FF42 BD FA 27                           JSR        DSPBRK           . DISPLAY THE BREAK POINT
+01432   FF45 7E F9 32                           JMP        MON$             . GO TO MONITOR ENTRY
+
+01434                          *
+01435                          *      VECTOR ENTRIES
+01436                          *
+01437   FF48 86 30             .SWI1            LDAA       #'0              
+01438   FF4A 8C                                 FCB        $8C              . SKIP 2
+01439   FF4B 86 31             .IRQ             LDAA       #'1              
+01440   FF4D 8C                                 FCB        $8C              . SKIP 2
+01441   FF4E 86 32             .NMI             LDAA       #'2              
+
+01443                          *
+01444                          *      DISPLAY THE REGISTERS
+01445                          *
+01446   FF50 9F 80                              STS        USTACK           . SAVE USER'S STACK
+01447   FF52 8E 00 FF                           LDS        #STACK           . GET MONITOR STACK
+01448   FF55 CE FF 64                           LDX        #DSPTBL          . POINT AT COMMAND TABLE
+01449   FF58 BD F9 78                           JSR        CHKCMD           . PROCESS THE COMMAND
+01450   FF5B 25 04                              BCS        DSPMON           . JUST ENTER MONITOR
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0026
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+01451   FF5D EE 01                              LDX        1,X              . GET ROUTINE
+01452   FF5F AD 00                              JSR        0,X              . PRINT THE REGISTERS
+01453   FF61 7E F9 32          DSPMON           JMP        MON$             . ENTER THE MONITOR
+
+01455                          *
+01456                          *    DISPLAY TABLE
+01457                          *
+01458   FF64 30                DSPTBL           FCB        '0               . SWI
+01459   FF65 FA 1D                              FDB        DSPSWI           
+01460   FF67 31                                 FCB        '1               . IRQ
+01461   FF68 FA 22                              FDB        DSPIRQ           
+01462   FF6A 32                                 FCB        '2               . NMI
+01463   FF6B FA 2C                              FDB        DSPNMI           
+01464   FF6D 00                                 FCB        0                . TERMINATOR
+
+01466                          *
+01467                          *    TABLE OF VECTOR ENTRIES
+01468                          *
+01469   FF6E FF 4B FF 4B FF    VECTBL           FDB        .IRQ,.IRQ,.IRQ,.IRQ 
+01470   FF76 FF 4B FF 48 FF                     FDB        .IRQ,.SWI1,.NMI  
+01471                          *
+01472                          *    VECTOR ROUTINES
+01473                          *
+01474   FF7C CE 00 82          IRQ3             LDX        #IRQSCI          . 'SCI'
+01475   FF7F 20 1C                              BRA        VECT$            
+01476   FF81 CE 00 84          IRQ2             LDX        #IRQTOF          . 'TOF'
+01477   FF84 20 17                              BRA        VECT$            
+01478   FF86 CE 00 86          IRQ1             LDX        #IRQOCF          . 'OCF'
+01479   FF89 20 12                              BRA        VECT$            
+01480   FF8B CE 00 88          IRQ0             LDX        #IRQICF          . 'ICF'
+01481   FF8E 20 0D                              BRA        VECT$            
+01482   FF90 CE 00 8A          IRQ              LDX        #IRQ$VC          . 'IRQ'
+01483   FF93 20 08                              BRA        VECT$            
+01484   FF95 CE 00 8C          SWIX             LDX        #SWI$VC          . 'SWI'
+01485   FF98 20 03                              BRA        VECT$            
+01486   FF9A CE 00 8E          NMI              LDX        #NMI$VC          . 'NMI'
+
+01488                          *
+01489                          *     VECTOR ENTRY
+01490                          *
+01491   FF9D E6 00             VECT$            LDAB       0,X              . GET THE VECTOR
+01492   FF9F A6 01                              LDAA       1,X              
+01493   FFA1 36                                 PSHA                        . SAVE IT ON THE STACK
+01494   FFA2 37                                 PSHB                        
+01495   FFA3 30                                 TSX                         . POINT AT THE STACK DATA
+01496   FFA4 A6 04                              LDAA       4,X              . GET THE AREG
+01497   FFA6 E6 03                              LDAB       3,X              . GET THE BREG
+01498   FFA8 36                                 PSHA                        . SAVE THE AREG
+01499   FFA9 A6 02                              LDAA       2,X              . GET CC'S
+01500   FFAB 8A 10                              ORAA       #%00010000       . SET THE 'I' BIT
+01501   FFAD EE 05                              LDX        5,X              . GET XREG
+01502   FFAF 06                                 TAP                         . SET THE CC'S
+01503   FFB0 32                                 PULA                        . RESTORE THE AREG
+01504   FFB1 39                                 RTS                         
+
+01506                          *
+01507                          *      VECTORS
+01508                          *
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0027
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+01509                                           ORG        ROMSTR+$7F0      
+01510   FFF0 FF 7C FF 81 FF                     FDB        IRQ3,IRQ2,IRQ1,IRQ0 
+01511   FFF8 FF 90 FF 07 FF                     FDB        IRQ,SWI1,NMI,COLD$ 
+
+01513                                           END                         
+
+  Total Errors --- 00000
+  Total Warnings - 00000
+
+Unresolved References:
+
+
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0028
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+
+CROSS REFERENCE TABLE
+  SYMBOL    SECT VALUE   DEF   USED
+
+  .IRQ              0   FF4B *01439 01469 01470 
+  .NMI              0   FF4E *01441 01470 
+  .SWI1             0   FF48 *01437 01470 
+  ACCTRL            0   0010 *00044 00558 00560 
+  ACIA$S            0   0010 *00043 00044 00045 00046 00047 
+  ACINIT            0   F81E *00120 00559 
+  ACSTAT            0   0010 *00045 00370 00381 01131 
+  ADDHEX            0   F9B8 *00344 00281 
+  ADDONE            0   F9D9 *00356 00354 
+  ADDRES            0   0090 *00081 00570 00571 00575 00577 00616 00624 00636 00669 00670 
+  AECHO             0   0092 *00082 00246 00374 01134 01151 01245 
+  BEGADR            0   00AD *00091 00971 01012 01013 01014 01015 01017 01047 01048 01049 01050 
+                              01052 01095 01100 01105 01164 01165 01169 01170 01200 01204 
+                              01208 01218 01226 01232 
+  BEGEND            0   FCD2 *00968 00113 01000 01035 01090 01157 
+  BEGEXT            0   FCF5 *00992 00970 00974 
+  BEGMSG            0   F83E *00130 00968 
+  BEGVAL            0   FCE7 *00982 00969 00973 
+  BELL              0   0007 *00057 00136 00138 00141 00144 
+  BK$DL0            0   FC58 *00872 00876 
+  BK$DSP            0   FC4D *00866 00837 
+  BP$FND            0   FF35 *01425 01413 
+  BP$LOP            0   FF22 *01410 01419 
+  BP$NXT            0   FF2A *01414 01411 
+  BRK$00            0   FC40 *00855 00846 
+  BRK$L0            0   FC33 *00844 00852 
+  BRKPTS            0   0099 *00088 00206 00842 00868 00888 00915 00926 00949 01405 
+  BRKSTG            0   F892 *00145 00866 
+  BRKSTR            0   F8C1 *00157 00428 
+  BYTECT            0   0093 *00083 01291 01318 01329 01341 01374 
+  C$BRK             0   F90D *00208 00211 
+  CBK$AL            0   FC8C *00915 00883 
+  CBK$CL            0   FC83 *00906 00896 
+  CBK$L0            0   FC71 *00893 00902 
+  CBK$L1            0   FC91 *00917 00920 
+  CBK$NX            0   FC79 *00897 00894 
+  CBKRTN            0   FC61 *00882 00717 
+  CHKCL0            0   F983 *00292 00298 
+  CHKCM0            0   F97D *00289 00280 
+  CHKCMD            0   F978 *00287 00695 01270 01449 
+  CHKDUM            0   F98E *00299 00291 00316 
+  CHKER$            0   FEDD *01356 01364 
+  CHKERR            0   F873 *00139 01356 
+  CHKHDN            0   F9B6 *00338 00336 
+  CHKHEX            0   F99C *00322 00279 00545 
+  CHKHNO            0   F9AC *00330 00323 00327 
+  CHKSUM            0   0094 *00084 00535 00536 01293 01363 01370 
+  CISHEX            0   F9AE *00334 00325 00329 
+  CKBKL             0   FDBF *01142 
+  CKBRK             0   FDB0 *01131 01192 
+  CKBRKL            0   FDBB *01136 01144 
+  CKBRKN            0   FDC8 *01151 01133 01137 
+  CL$STK            0   F928 *00229 00232 
+  CLR$B0            0   FCBE *00951 00962 
+  CLR$NY            0   FCC8 *00956 00954 
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0029
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+  CLRBRK            0   FCB9 *00949 00799 01430 
+  CMD$DO            0   F990 *00305 00293 
+  CMDLOP            0   F963 *00275 
+  CMDLP0            0   F96B *00278 00282 
+  CMDTBL            0   F992 *00311 00257 
+  CMP$ER            0   FD52 *01062 
+  CMP$EX            0   FD6F *01080 01036 
+  CMP$L0            0   FD4D *01055 01076 
+  CMP$NX            0   FD69 *01074 01057 
+  CMPMEM            0   FD27 *01033 00725 
+  CMPMSG            0   F865 *00137 01065 
+  COLD$             0   F8E0 *00175 01511 
+  CR                0   000D *00054 00146 00315 00605 00986 
+  CRLF              0   F8A3 *00146 00404 
+  DB$STK            0   00AB *00090 
+  DM$PL0            0   FDF6 *01185 01187 
+  DMP$00            0   FDD4 *01164 01158 
+  DMP$BK            0   FE3D *01235 01193 
+  DMP$EX            0   FE43 *01239 01159 
+  DMP$IA            0   FE1C *01214 01212 
+  DMP$L0            0   FDFA *01192 01234 
+  DMP$L2            0   FE01 *01200 
+  DMP$L3            0   FE0E *01207 01221 
+  DMP$L4            0   FE3F *01236 01238 
+  DMP$NA            0   FE1A *01213 01210 
+  DSPBRK            0   FA27 *00428 01431 
+  DSPIRQ            0   FA22 *00424 01461 
+  DSPMEM            0   FDCC *01157 00719 
+  DSPMON            0   FF61 *01453 01450 
+  DSPNMI            0   FA2C *00432 01463 
+  DSPREG            0   FA18 *00416 00709 
+  DSPRTN            0   FA31 *00438 00413 00417 00421 00425 00429 00433 
+  DSPRTS            0   FA13 *00412 00798 
+  DSPSTR            0   F8C9 *00159 00439 
+  DSPSWI            0   FA1D *00420 01459 
+  DSPTBL            0   FF64 *01458 01448 
+  DUMTBL            0   FE72 *01284 00983 
+  ENDADR            0   00AF *00092 00975 01004 01005 01008 01009 01022 01039 01040 01043 01044 
+                              01075 01092 01094 01106 01171 01172 01178 01179 01233 
+  ENDMSG            0   F84A *00132 00972 
+  EX$BAK            0   FB0E *00622 00604 
+  EX$BEL            0   FB29 *00648 00642 
+  EX$FST            0   FB6C *00688 00686 
+  EX$JMP            0   FAF0 *00591 00585 
+  EX$LNG            0   FB61 *00684 00679 00681 
+  EX$LP0            0   FAD7 *00574 00617 00625 00689 
+  EX$LP1            0   FAE0 *00577 00631 
+  EX$LP2            0   FAE5 *00583 
+  EX$NXT            0   FB07 *00614 00600 00602 
+  EX$OEX            0   FB6D *00689 00665 
+  EX$OFS            0   FB37 *00663 00608 
+  EX$RTS            0   FB34 *00657 00606 
+  EX$SAM            0   FB15 *00630 00598 
+  EX$SHT            0   FB69 *00687 00678 00683 
+  EX$SHX            0   FB59 *00680 00676 
+  EX$STR            0   FB19 *00636 00614 00622 00630 00657 
+  EXAMIN            0   FACB *00566 00312 
+  EXMTBL            0   FAF4 *00597 00583 
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0030
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+  EXNSTR            0   FB28 *00643 00638 
+  FIL$EX            0   FD25 *01027 01001 
+  FIL$L0            0   FD1D *01020 01023 
+  FILMEM            0   FCF7 *00998 00723 
+  GETCMD            0   F961 *00274 00258 00584 00984 
+  GO$BAD            0   FBFF *00805 00740 00754 
+  GO$CON            0   FC08 *00812 00721 
+  GO$SB2            0   FBE7 *00785 00112 00769 
+  GO$SB3            0   FBE8 *00791 01393 
+  GO$SBL            0   FBC7 *00764 00768 
+  GO$SUB            0   FBBB *00753 00713 
+  GO$USR            0   FBA7 *00739 00711 00816 
+  GOU$DO            0   FBB7 *00747 00780 
+  HEADER            0   F81F *00125 00220 
+  HEX$IT            0   FA81 *00499 00492 
+  IN2HEX            0   FA9E *00524 00509 00513 01290 01326 01340 01371 
+  IN4HEX            0   FA8E *00509 01375 
+  INCH              0   F9E3 *00370 00106 00363 00372 
+  INCHNP            0   F9DE *00363 00107 00278 00287 00544 00663 01135 01142 01262 
+  INHEX             0   FAB8 *00544 00524 00531 
+  INVAL             0   F837 *00128 00684 
+  IO$STR            0   0000 *00038 00043 
+  IOSET             0   FAC1 *00557 00182 
+  IRQ               0   FF90 *01482 01511 
+  IRQ$RT            0   FD99 *01113 00729 
+  IRQ$VC            0   008A *00074 01482 
+  IRQ0              0   FF8B *01480 01510 
+  IRQ1              0   FF86 *01478 01510 
+  IRQ2              0   FF81 *01476 01510 
+  IRQ3              0   FF7C *01474 01510 
+  IRQFLG            0   0095 *00085 00213 00247 01117 01125 
+  IRQICF            0   0088 *00073 01480 
+  IRQOCF            0   0086 *00072 01478 
+  IRQSCI            0   0082 *00070 01474 
+  IRQSTR            0   F8B5 *00151 00424 
+  IRQTOF            0   0084 *00071 01476 
+  LD$CHK            0   FEE5 *01363 01342 
+  LD$EDE            0   FE8F *01301 01292 01294 
+  LD$HD0            0   FEB1 *01326 01330 
+  LD$SET            0   FEED *01370 01289 01317 01339 
+  LERR$R            0   FEE0 *01357 01353 
+  LF                0   000A *00055 00146 00601 
+  LOAD              0   FE44 *01244 00733 
+  LOAD00            0   FE56 *01262 01264 01271 01320 01334 01365 
+  LOADED            0   FE73 *01289 01283 
+  LOADER            0   F884 *00142 01382 
+  LOADHD            0   FEA7 *01317 01279 
+  LOADR0            0   FEC7 *01340 01347 
+  LOADRC            0   FEC4 *01339 01281 
+  LOD$EX            0   FE9E *01308 01358 01384 
+  LOD$L0            0   FE4D *01252 01254 
+  LOD$L1            0   FE97 *01304 01305 
+  LOD$L2            0   FEA0 *01309 01311 
+  MEMER$            0   FED8 *01352 01345 
+  MEMERR            0   F856 *00134 00649 01352 
+  MON$              0   F932 *00243 00262 00269 00800 00807 01312 01432 01453 
+  MOVEXT            0   FD98 *01108 01089 01091 
+  MOVLP0            0   FD86 *01098 01107 
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0031
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+  MOVMEM            0   FD71 *01086 00727 
+  NMI               0   FF9A *01486 01511 
+  NMI$VC            0   008E *00076 01486 
+  NMISTR            0   F8BD *00155 00432 
+  NO$IHX            0   FABF *00551 00510 00525 00532 
+  NO$IHY            0   FABE *00550 
+  NOT$SB            0   FF12 *01398 01392 
+  OFFSET            0   00A9 *00089 00214 00215 00568 00569 00824 00830 01002 01003 01010 01011 
+                              01037 01038 01045 01046 01167 01168 01174 01175 
+  OFS$DS            0   FC1E *00828 00822 
+  OFS$RT            0   FC14 *00821 00731 
+  OUT$LP            0   F9F1 *00381 00383 
+  OUT2H             0   FA76 *00487 00479 00480 01126 
+  OUT2HS            0   FA6F *00480 00114 00471 00578 00687 01069 01219 
+  OUT4HS            0   FA6D *00479 00115 00458 00576 00831 00872 01068 01202 
+  OUTCH             0   F9F0 *00380 00108 00396 00482 00504 00829 01124 01246 01302 
+  OUTHX             0   FA8B *00504 00502 
+  OUTRTS            0   F9FA *00386 00375 
+  OUTS              0   FA71 *00481 00666 
+  P$DONE            0   FA08 *00398 00395 
+  PCRLF             0   FA09 *00403 00111 00391 00574 01201 
+  PDATA             0   F9FB *00391 00109 00221 00245 00438 00867 00982 01066 01307 01357 
+  PDATA1            0   F9FD *00392 00110 00268 00397 00405 00455 00468 00650 00685 01231 01383 
+  PRMT              0   F831 *00127 00244 
+  PRNT2B            0   FA5B *00466 00444 00473 
+  PRNT4B            0   FA49 *00453 00446 00460 
+  PRTIRQ            0   FDA5 *01123 01114 
+  RAMEND            0   0100 *00037 00099 00100 
+  RAMSTR            0   0080 *00036 00062 
+  RDRF              0   0001 *00048 00371 01132 
+  RECTYP            0   FE69 *01278 01269 
+  REGSTR            0   F8B1 *00149 00416 
+  ROMSTR            0   F800 *00035 00105 01509 
+  RTSSTR            0   F8AA *00147 00412 
+  RXDATA            0   0011 *00046 00373 
+  SB$JMP            0   FB7B *00702 00696 
+  SBKRTN            0   FC29 *00836 00715 
+  SET$B0            0   FC9D *00928 00943 
+  SET$NX            0   FCAF *00937 00930 
+  SETBRK            0   FC98 *00926 00747 
+  SPACE             0   0020 *00056 00481 00599 01211 
+  STACK             0   00FF *00100 00175 00243 00793 00805 01429 01447 
+  STP$LD            0   FEFF *01382 01372 01376 
+  SUB$RK            0   FBE8 *00786 01391 
+  SUBPRG            0   FB70 *00694 00314 
+  SUBTBL            0   FB7F *00708 00694 
+  SWI$VC            0   008C *00075 01484 
+  SWI1              0   FF07 *01389 01511 
+  SWISTR            0   F8B9 *00153 00420 
+  SWIX              0   FF95 *01484 01420 
+  TDRE              0   0002 *00049 00382 
+  TMP$00            0   00B1 *00093 00188 00192 00195 00453 00457 00466 00470 00530 00533 00534 
+                              00537 00648 00651 00770 00772 00773 00890 00901 01062 01067 
+                              01070 01087 01101 01104 01195 01214 01217 01227 01295 01297 
+                              01298 01400 01418 
+  TMP$01            0   00B3 *00094 00190 00196 00199 00440 00454 00456 00467 00469 01063 
+  TMP$02            0   00B5 *00095 00403 00406 
+  TMP$03            0   00B7 *00096 00274 00288 00289 00928 00932 00937 00951 00956 
+Macro Cross Assembler RMCA6800 (3.11) - Mon Dec 22 07:46:02 2003                                                         Page 0032
+ Sunday, October 12, 2003 (mlh) DEBUG MONITOR FOR System6801
+ 
+
+  TXDATA            0   0011 *00047 00384 
+  U$STK             0   00DB *00099 00180 
+  USTACK            0   0080 *00064 00181 00226 00233 00238 00441 00447 00741 00755 00791 00812 
+                              01296 01428 01446 
+  VALUE             0   0097 *00087 00276 00344 00345 00346 00347 00348 00349 00350 00351 00352 
+                              00353 00355 00566 00567 00639 00667 00668 00743 00744 00776 
+                              00777 00794 00795 00815 00823 00855 00856 00891 00892 00985 
+                              00998 01033 01086 01115 
+  VAREND            0   00B9 *00097 00099 
+  VARSTR            0   0080 *00063 
+  VCTLP0            0   F8F7 *00192 00201 
+  VECBUF            0   0082 *00069 00189 
+  VECT$             0   FF9D *01491 01475 01477 01479 01481 01483 01485 
+  VECTBL            0   FF6E *01469 00187 
+  VFLAG             0   0096 *00086 00277 00357 00637 00739 00753 00814 00821 00836 00882 01088 
+                              01113 
+  WARM$             0   F930 *00238 
+  WHAT              0   F863 *00136 00267 
+  WHATER            0   F958 *00267 00259 00586 00697 00806 
+
+
