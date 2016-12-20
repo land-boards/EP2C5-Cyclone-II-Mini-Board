@@ -4,10 +4,10 @@ JedecChain;
 	DefaultMfr(6E);
 
 	P ActionCode(Cfg)
-		Device PartName(EP2C5T144) Path("C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/UK101/output_files/") File("uk101.sof") MfrSpec(OpMask(1));
+		Device PartName(EPCS4) Path("C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/UK101/output_files/") File("uk101.pof") MfrSpec(OpMask(1) Child_OpMask(1 1));
 
 ChainEnd;
 
 AlteraBegin;
-	ChainType(JTAG);
+	ChainType(asc);
 AlteraEnd;
