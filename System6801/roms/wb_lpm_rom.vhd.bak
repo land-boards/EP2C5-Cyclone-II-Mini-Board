@@ -39,7 +39,7 @@ entity wb_lpm_rom is
 	generic (
 		LPM_WIDTH	:		positive	range 1 to 64 := 8;				-- data bits WIDE
 		LPM_WIDTHAD :	positive	range 1 to 32	:= 8;				-- address bits;
-		LPM_FILE :		string	:= "cpu01mon";								-- ROM Data File
+		LPM_FILE :		string	:= "my_rom";								-- ROM Data File
 		LPM_FAMILY  : string := "UNUSED"
 	);
 	port (
