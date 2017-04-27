@@ -1,5 +1,5 @@
 TimeQuest Timing Analyzer report for Blink2
-Sun Nov 20 20:09:24 2016
+Thu Apr 27 15:39:18 2017
 Quartus II 64-Bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -242,7 +242,7 @@ No paths to report.
 +-----------+------------+-------+-------+------------+-----------------+
 ; D2        ; Clock      ; 7.240 ; 7.240 ; Rise       ; Clock           ;
 ; D4        ; Clock      ; 6.824 ; 6.824 ; Rise       ; Clock           ;
-; D5        ; Clock      ; 6.825 ; 6.825 ; Rise       ; Clock           ;
+; D5        ; Clock      ; 9.165 ; 9.165 ; Rise       ; Clock           ;
 ; P31       ; Clock      ; 8.097 ; 8.097 ; Rise       ; Clock           ;
 +-----------+------------+-------+-------+------------+-----------------+
 
@@ -254,7 +254,7 @@ No paths to report.
 +-----------+------------+-------+-------+------------+-----------------+
 ; D2        ; Clock      ; 7.240 ; 7.240 ; Rise       ; Clock           ;
 ; D4        ; Clock      ; 6.824 ; 6.824 ; Rise       ; Clock           ;
-; D5        ; Clock      ; 6.825 ; 6.825 ; Rise       ; Clock           ;
+; D5        ; Clock      ; 9.165 ; 9.165 ; Rise       ; Clock           ;
 ; P31       ; Clock      ; 8.097 ; 8.097 ; Rise       ; Clock           ;
 +-----------+------------+-------+-------+------------+-----------------+
 
@@ -390,7 +390,7 @@ No paths to report.
 +-----------+------------+-------+-------+------------+-----------------+
 ; D2        ; Clock      ; 3.400 ; 3.400 ; Rise       ; Clock           ;
 ; D4        ; Clock      ; 3.255 ; 3.255 ; Rise       ; Clock           ;
-; D5        ; Clock      ; 3.256 ; 3.256 ; Rise       ; Clock           ;
+; D5        ; Clock      ; 4.058 ; 4.058 ; Rise       ; Clock           ;
 ; P31       ; Clock      ; 3.799 ; 3.799 ; Rise       ; Clock           ;
 +-----------+------------+-------+-------+------------+-----------------+
 
@@ -402,7 +402,7 @@ No paths to report.
 +-----------+------------+-------+-------+------------+-----------------+
 ; D2        ; Clock      ; 3.400 ; 3.400 ; Rise       ; Clock           ;
 ; D4        ; Clock      ; 3.255 ; 3.255 ; Rise       ; Clock           ;
-; D5        ; Clock      ; 3.256 ; 3.256 ; Rise       ; Clock           ;
+; D5        ; Clock      ; 4.058 ; 4.058 ; Rise       ; Clock           ;
 ; P31       ; Clock      ; 3.799 ; 3.799 ; Rise       ; Clock           ;
 +-----------+------------+-------+-------+------------+-----------------+
 
@@ -444,7 +444,7 @@ No paths to report.
 +-----------+------------+-------+-------+------------+-----------------+
 ; D2        ; Clock      ; 7.240 ; 7.240 ; Rise       ; Clock           ;
 ; D4        ; Clock      ; 6.824 ; 6.824 ; Rise       ; Clock           ;
-; D5        ; Clock      ; 6.825 ; 6.825 ; Rise       ; Clock           ;
+; D5        ; Clock      ; 9.165 ; 9.165 ; Rise       ; Clock           ;
 ; P31       ; Clock      ; 8.097 ; 8.097 ; Rise       ; Clock           ;
 +-----------+------------+-------+-------+------------+-----------------+
 
@@ -456,7 +456,7 @@ No paths to report.
 +-----------+------------+-------+-------+------------+-----------------+
 ; D2        ; Clock      ; 3.400 ; 3.400 ; Rise       ; Clock           ;
 ; D4        ; Clock      ; 3.255 ; 3.255 ; Rise       ; Clock           ;
-; D5        ; Clock      ; 3.256 ; 3.256 ; Rise       ; Clock           ;
+; D5        ; Clock      ; 4.058 ; 4.058 ; Rise       ; Clock           ;
 ; P31       ; Clock      ; 3.799 ; 3.799 ; Rise       ; Clock           ;
 +-----------+------------+-------+-------+------------+-----------------+
 
@@ -513,7 +513,7 @@ No dedicated SERDES Receiver circuitry present in device or used in design
 Info: *******************************************************************
 Info: Running Quartus II 64-Bit TimeQuest Timing Analyzer
     Info: Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
-    Info: Processing started: Sun Nov 20 20:09:23 2016
+    Info: Processing started: Thu Apr 27 15:39:17 2017
 Info: Command: quartus_sta Counter1 -c Blink2
 Info: qsta_default_script.tcl version: #1
 Warning (20028): Parallel compilation is not licensed and has been disabled
@@ -561,8 +561,8 @@ Info (332001): The selected device family is not supported by the report_metasta
 Info (332102): Design is not fully constrained for setup requirements
 Info (332102): Design is not fully constrained for hold requirements
 Info: Quartus II 64-Bit TimeQuest Timing Analyzer was successful. 0 errors, 4 warnings
-    Info: Peak virtual memory: 420 megabytes
-    Info: Processing ended: Sun Nov 20 20:09:24 2016
+    Info: Peak virtual memory: 382 megabytes
+    Info: Processing ended: Thu Apr 27 15:39:18 2017
     Info: Elapsed time: 00:00:01
     Info: Total CPU time (on all processors): 00:00:01
 

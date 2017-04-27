@@ -51,7 +51,7 @@ set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.3-V LVTTL"
 set_location_assignment PIN_144 -to Button
 set_location_assignment PIN_3 -to D2
 set_location_assignment PIN_7 -to D4
-set_location_assignment PIN_9 -to D5
+set_location_assignment PIN_53 -to D5
 set_location_assignment PIN_31 -to P31
 set_global_assignment -name QIP_FILE lpm_counter0.qip
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top

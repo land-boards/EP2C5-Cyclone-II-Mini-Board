@@ -14,8 +14,9 @@ use ieee.std_logic_unsigned.all;
 
 entity counter is
 
-generic(n: natural :=16);
-port(	clock:	in std_logic;
+generic(n: natural :=28);
+port(	
+	clock:	in std_logic;
 	clear:	in std_logic;
 	count:	in std_logic;
 	Q:	out std_logic_vector(n-1 downto 0)
@@ -50,7 +51,7 @@ end behv;
 
 -----------------------------------------------------
 
-Finite State Machine
+-- Finite State Machine
 
 -----------------------------------------------------
 -- VHDL FSM (Finite State Machine) modeling

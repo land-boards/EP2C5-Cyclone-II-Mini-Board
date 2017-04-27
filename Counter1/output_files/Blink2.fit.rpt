@@ -1,5 +1,5 @@
 Fitter report for Blink2
-Sun Nov 20 20:09:19 2016
+Thu Apr 27 15:39:14 2017
 Quartus II 64-Bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -62,7 +62,7 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Fitter Summary                                                                       ;
 +------------------------------------+-------------------------------------------------+
-; Fitter Status                      ; Successful - Sun Nov 20 20:09:19 2016           ;
+; Fitter Status                      ; Successful - Thu Apr 27 15:39:14 2017           ;
 ; Quartus II 64-Bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
 ; Revision Name                      ; Blink2                                          ;
 ; Top-level Entity Name              ; Blink2                                          ;
@@ -181,7 +181,7 @@ Parallel compilation was disabled, but you have multiple processors available. E
 +--------------+
 ; Pin-Out File ;
 +--------------+
-The pin-out file can be found in C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/Counter1/output_files/Blink2.pin.
+The pin-out file can be found in C:/Users/DGilliland/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/Counter1/output_files/Blink2.pin.
 
 
 +-------------------------------------------------------------------+
@@ -320,7 +320,7 @@ The pin-out file can be found in C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclon
 +------+-------+----------+--------------+--------------+-------------+-----------------+------------------------+---------------+-----------------+------------+---------------+----------+--------------+--------------+------------------+-------------+----------------------+------+----------------------+---------------------+
 ; D2   ; 3     ; 1        ; 0            ; 13           ; 2           ; no              ; no                     ; no            ; no              ; no         ; no            ; no       ; Off          ; 3.3-V LVTTL  ; 24mA             ; Off         ; User                 ; 0 pF ; -                    ; -                   ;
 ; D4   ; 7     ; 1        ; 0            ; 11           ; 1           ; no              ; no                     ; no            ; no              ; no         ; no            ; no       ; Off          ; 3.3-V LVTTL  ; 24mA             ; Off         ; User                 ; 0 pF ; -                    ; -                   ;
-; D5   ; 9     ; 1        ; 0            ; 11           ; 3           ; no              ; no                     ; no            ; no              ; no         ; no            ; no       ; Off          ; 3.3-V LVTTL  ; 24mA             ; Off         ; User                 ; 0 pF ; -                    ; -                   ;
+; D5   ; 53    ; 4        ; 9            ; 0            ; 1           ; no              ; no                     ; no            ; no              ; no         ; no            ; no       ; Off          ; 3.3-V LVTTL  ; 24mA             ; Off         ; User                 ; 0 pF ; -                    ; -                   ;
 ; P31  ; 31    ; 1        ; 0            ; 2            ; 3           ; no              ; no                     ; no            ; no              ; no         ; no            ; no       ; Off          ; 3.3-V LVTTL  ; 24mA             ; Off         ; User                 ; 0 pF ; -                    ; -                   ;
 +------+-------+----------+--------------+--------------+-------------+-----------------+------------------------+---------------+-----------------+------------+---------------+----------+--------------+--------------+------------------+-------------+----------------------+------+----------------------+---------------------+
 
@@ -330,10 +330,10 @@ The pin-out file can be found in C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclon
 +----------+-----------------+---------------+--------------+
 ; I/O Bank ; Usage           ; VCCIO Voltage ; VREF Voltage ;
 +----------+-----------------+---------------+--------------+
-; 1        ; 7 / 19 ( 37 % ) ; 3.3V          ; --           ;
+; 1        ; 6 / 19 ( 32 % ) ; 3.3V          ; --           ;
 ; 2        ; 1 / 23 ( 4 % )  ; 3.3V          ; --           ;
 ; 3        ; 1 / 23 ( 4 % )  ; 3.3V          ; --           ;
-; 4        ; 0 / 24 ( 0 % )  ; 3.3V          ; --           ;
+; 4        ; 1 / 24 ( 4 % )  ; 3.3V          ; --           ;
 +----------+-----------------+---------------+--------------+
 
 
@@ -350,7 +350,7 @@ The pin-out file can be found in C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclon
 ; 6        ;            ;          ; GND                                      ; gnd    ;              ;         ; --         ;                 ; --       ; --           ;
 ; 7        ; 10         ; 1        ; D4                                       ; output ; 3.3-V LVTTL  ;         ; Row I/O    ; Y               ; no       ; Off          ;
 ; 8        ; 11         ; 1        ; GND*                                     ;        ;              ;         ; Row I/O    ;                 ; no       ; Off          ;
-; 9        ; 12         ; 1        ; D5                                       ; output ; 3.3-V LVTTL  ;         ; Row I/O    ; Y               ; no       ; Off          ;
+; 9        ; 12         ; 1        ; GND*                                     ;        ;              ;         ; Row I/O    ;                 ; no       ; Off          ;
 ; 10       ; 13         ; 1        ; #TDO                                     ; output ;              ;         ; --         ;                 ; --       ; --           ;
 ; 11       ; 14         ; 1        ; #TMS                                     ; input  ;              ;         ; --         ;                 ; --       ; --           ;
 ; 12       ; 15         ; 1        ; #TCK                                     ; input  ;              ;         ; --         ;                 ; --       ; --           ;
@@ -394,7 +394,7 @@ The pin-out file can be found in C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclon
 ; 50       ;            ;          ; VCCINT                                   ; power  ;              ; 1.2V    ; --         ;                 ; --       ; --           ;
 ; 51       ; 52         ; 4        ; GND*                                     ;        ;              ;         ; Column I/O ;                 ; --       ; --           ;
 ; 52       ; 53         ; 4        ; GND*                                     ;        ;              ;         ; Column I/O ;                 ; no       ; Off          ;
-; 53       ; 57         ; 4        ; GND*                                     ;        ;              ;         ; Column I/O ;                 ; no       ; Off          ;
+; 53       ; 57         ; 4        ; D5                                       ; output ; 3.3-V LVTTL  ;         ; Column I/O ; Y               ; no       ; Off          ;
 ; 54       ;            ; 4        ; VCCIO4                                   ; power  ;              ; 3.3V    ; --         ;                 ; --       ; --           ;
 ; 55       ; 58         ; 4        ; GND*                                     ;        ;              ;         ; Column I/O ;                 ; no       ; Off          ;
 ; 56       ;            ;          ; GND                                      ; gnd    ;              ;         ; --         ;                 ; --       ; --           ;
@@ -615,12 +615,12 @@ Note: For table entries with two numbers listed, the numbers in parentheses indi
 +-----------------------------+----------------------+
 ; Block interconnects         ; 5 / 15,666 ( < 1 % ) ;
 ; C16 interconnects           ; 0 / 812 ( 0 % )      ;
-; C4 interconnects            ; 5 / 11,424 ( < 1 % ) ;
-; Direct links                ; 2 / 15,666 ( < 1 % ) ;
+; C4 interconnects            ; 8 / 11,424 ( < 1 % ) ;
+; Direct links                ; 1 / 15,666 ( < 1 % ) ;
 ; Global clocks               ; 1 / 8 ( 13 % )       ;
 ; Local interconnects         ; 5 / 4,608 ( < 1 % )  ;
 ; R24 interconnects           ; 0 / 652 ( 0 % )      ;
-; R4 interconnects            ; 0 / 13,328 ( 0 % )   ;
+; R4 interconnects            ; 3 / 13,328 ( < 1 % ) ;
 +-----------------------------+----------------------+
 
 
@@ -766,7 +766,7 @@ Info (170195): Router estimated average interconnect usage is 0% of the availabl
 Info (170194): Fitter routing operations ending: elapsed time is 00:00:00
 Info (170199): The Fitter performed an Auto Fit compilation.  Optimizations were skipped to reduce compilation time.
     Info (170201): Optimizations that may affect the design's routability were skipped
-Info (11888): Total time spent on timing analysis during the Fitter is 0.25 seconds.
+Info (11888): Total time spent on timing analysis during the Fitter is 0.12 seconds.
 Info (306004): Started post-fitting delay annotation
 Warning (306006): Found 4 output pins without output pin load capacitance assignment
     Info (306007): Pin "D2" has no specified output pin load capacitance -- assuming default load capacitance of 0 pF for timing analysis
@@ -778,17 +778,17 @@ Info (306004): Started post-fitting delay annotation
 Info (306005): Delay annotation completed successfully
 Info (11218): Fitter post-fit operations ending: elapsed time is 00:00:01
 Warning (169174): The Reserve All Unused Pins setting has not been specified, and will default to 'As output driving ground'.
-Info (144001): Generated suppressed messages file C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/Counter1/output_files/Blink2.fit.smsg
+Info (144001): Generated suppressed messages file C:/Users/DGilliland/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/Counter1/output_files/Blink2.fit.smsg
 Info: Quartus II 64-Bit Fitter was successful. 0 errors, 5 warnings
-    Info: Peak virtual memory: 683 megabytes
-    Info: Processing ended: Sun Nov 20 20:09:19 2016
-    Info: Elapsed time: 00:00:05
-    Info: Total CPU time (on all processors): 00:00:04
+    Info: Peak virtual memory: 577 megabytes
+    Info: Processing ended: Thu Apr 27 15:39:14 2017
+    Info: Elapsed time: 00:00:03
+    Info: Total CPU time (on all processors): 00:00:02
 
 
 +----------------------------+
 ; Fitter Suppressed Messages ;
 +----------------------------+
-The suppressed messages can be found in C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/Counter1/output_files/Blink2.fit.smsg.
+The suppressed messages can be found in C:/Users/DGilliland/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/Counter1/output_files/Blink2.fit.smsg.
 
 
