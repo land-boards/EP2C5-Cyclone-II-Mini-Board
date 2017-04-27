@@ -1,5 +1,5 @@
 Assembler report for Blink2
-Sun Nov 20 12:52:07 2016
+Thu Apr 27 15:35:07 2017
 Quartus II 64-Bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -10,8 +10,8 @@ Quartus II 64-Bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edit
   2. Assembler Summary
   3. Assembler Settings
   4. Assembler Generated Files
-  5. Assembler Device Options: C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/Blink2/output_files/Blink2.sof
-  6. Assembler Device Options: C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/Blink2/output_files/Blink2.pof
+  5. Assembler Device Options: C:/Users/DGilliland/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/Blink2/output_files/Blink2.sof
+  6. Assembler Device Options: C:/Users/DGilliland/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/Blink2/output_files/Blink2.pof
   7. Assembler Messages
 
 
@@ -38,7 +38,7 @@ applicable agreement for further details.
 +---------------------------------------------------------------+
 ; Assembler Summary                                             ;
 +-----------------------+---------------------------------------+
-; Assembler Status      ; Successful - Sun Nov 20 12:52:07 2016 ;
+; Assembler Status      ; Successful - Thu Apr 27 15:35:07 2017 ;
 ; Revision Name         ; Blink2                                ;
 ; Top-level Entity Name ; Blink2                                ;
 ; Family                ; Cyclone II                            ;
@@ -78,37 +78,37 @@ applicable agreement for further details.
 +-----------------------------------------------------------------------------+----------+---------------+
 
 
-+-----------------------------------------------------------------------------------------------+
-; Assembler Generated Files                                                                     ;
-+-----------------------------------------------------------------------------------------------+
-; File Name                                                                                     ;
-+-----------------------------------------------------------------------------------------------+
-; C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/Blink2/output_files/Blink2.sof ;
-; C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/Blink2/output_files/Blink2.pof ;
-+-----------------------------------------------------------------------------------------------+
++-------------------------------------------------------------------------------------------------+
+; Assembler Generated Files                                                                       ;
++-------------------------------------------------------------------------------------------------+
+; File Name                                                                                       ;
++-------------------------------------------------------------------------------------------------+
+; C:/Users/DGilliland/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/Blink2/output_files/Blink2.sof ;
+; C:/Users/DGilliland/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/Blink2/output_files/Blink2.pof ;
++-------------------------------------------------------------------------------------------------+
 
 
-+-------------------------------------------------------------------------------------------------------------------------+
-; Assembler Device Options: C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/Blink2/output_files/Blink2.sof ;
-+----------------+--------------------------------------------------------------------------------------------------------+
-; Option         ; Setting                                                                                                ;
-+----------------+--------------------------------------------------------------------------------------------------------+
-; Device         ; EP2C5T144C8                                                                                            ;
-; JTAG usercode  ; 0x00073189                                                                                             ;
-; Checksum       ; 0x00073189                                                                                             ;
-+----------------+--------------------------------------------------------------------------------------------------------+
++---------------------------------------------------------------------------------------------------------------------------+
+; Assembler Device Options: C:/Users/DGilliland/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/Blink2/output_files/Blink2.sof ;
++----------------+----------------------------------------------------------------------------------------------------------+
+; Option         ; Setting                                                                                                  ;
++----------------+----------------------------------------------------------------------------------------------------------+
+; Device         ; EP2C5T144C8                                                                                              ;
+; JTAG usercode  ; 0x00073197                                                                                               ;
+; Checksum       ; 0x00073197                                                                                               ;
++----------------+----------------------------------------------------------------------------------------------------------+
 
 
-+-------------------------------------------------------------------------------------------------------------------------+
-; Assembler Device Options: C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/Blink2/output_files/Blink2.pof ;
-+--------------------+----------------------------------------------------------------------------------------------------+
-; Option             ; Setting                                                                                            ;
-+--------------------+----------------------------------------------------------------------------------------------------+
-; Device             ; EPCS4                                                                                              ;
-; JTAG usercode      ; 0x00000000                                                                                         ;
-; Checksum           ; 0x075330EF                                                                                         ;
-; Compression Ratio  ; 3                                                                                                  ;
-+--------------------+----------------------------------------------------------------------------------------------------+
++---------------------------------------------------------------------------------------------------------------------------+
+; Assembler Device Options: C:/Users/DGilliland/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/Blink2/output_files/Blink2.pof ;
++--------------------+------------------------------------------------------------------------------------------------------+
+; Option             ; Setting                                                                                              ;
++--------------------+------------------------------------------------------------------------------------------------------+
+; Device             ; EPCS4                                                                                                ;
+; JTAG usercode      ; 0x00000000                                                                                           ;
+; Checksum           ; 0x075332D5                                                                                           ;
+; Compression Ratio  ; 3                                                                                                    ;
++--------------------+------------------------------------------------------------------------------------------------------+
 
 
 +--------------------+
@@ -117,13 +117,13 @@ applicable agreement for further details.
 Info: *******************************************************************
 Info: Running Quartus II 64-Bit Assembler
     Info: Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
-    Info: Processing started: Sun Nov 20 12:52:06 2016
+    Info: Processing started: Thu Apr 27 15:35:06 2017
 Info: Command: quartus_asm --read_settings_files=off --write_settings_files=off Blink2 -c Blink2
 Info (115031): Writing out detailed assembly data for power analysis
 Info (115030): Assembler is generating device programming files
 Info: Quartus II 64-Bit Assembler was successful. 0 errors, 0 warnings
-    Info: Peak virtual memory: 438 megabytes
-    Info: Processing ended: Sun Nov 20 12:52:07 2016
+    Info: Peak virtual memory: 412 megabytes
+    Info: Processing ended: Thu Apr 27 15:35:07 2017
     Info: Elapsed time: 00:00:01
     Info: Total CPU time (on all processors): 00:00:01
 

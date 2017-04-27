@@ -4,7 +4,7 @@ JedecChain;
 	DefaultMfr(6E);
 
 	P ActionCode(Cfg)
-		Device PartName(EP2C5T144) Path("C:/Users/doug_000/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/Blink2/output_files/") File("Blink2.sof") MfrSpec(OpMask(1));
+		Device PartName(EP2C5T144) Path("C:/Users/DGilliland/Documents/GitHub/EP2C5-Cyclone-II-Mini-Board/Blink2/output_files/") File("Blink2.sof") MfrSpec(OpMask(1));
 
 ChainEnd;
 
