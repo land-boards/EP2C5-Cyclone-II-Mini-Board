@@ -1,9 +1,0 @@
-{ "Info" "0" "" "qar.tcl version #1" {  } {  } 0 0 "qar.tcl version #1" 0 0 "0" 0 0 1493322340988 ""}
-{ "Info" "0" "" "Including '-use_file_set basic' by default" {  } {  } 0 0 "Including '-use_file_set basic' by default" 0 0 "0" 0 0 1493322341521 ""}
-{ "Info" "0" "" "Initializing files for 'Blink1' revision" {  } {  } 0 0 "Initializing files for 'Blink1' revision" 0 0 "0" 0 0 1493322341587 ""}
-{ "Info" "0" "" "File Set 'Source control' contains:" { { "Info" "0" "" "Project source and settings files" {  } {  } 0 0 "Project source and settings files" 0 0 "0" 0 0 1493322341594 ""} { "Info" "0" "" "Automatically detected source files" {  } {  } 0 0 "Automatically detected source files" 0 0 "0" 0 0 1493322341594 ""}  } {  } 0 0 "File Set 'Source control' contains:" 0 0 "0" 0 0 1493322341594 ""}
-{ "Info" "0" "" "----------------------------------------------------------" {  } {  } 0 0 "----------------------------------------------------------" 0 0 "0" 0 0 1493322341741 ""}
-{ "Info" "0" "" "----------------------------------------------------------" {  } {  } 0 0 "----------------------------------------------------------" 0 0 "0" 0 0 1493322341741 ""}
-{ "Info" "0" "" "Generated archive 'Blink1_tmp_archive.qar'" {  } {  } 0 0 "Generated archive 'Blink1_tmp_archive.qar'" 0 0 "0" 0 0 1493322341741 ""}
-{ "Info" "0" "" "----------------------------------------------------------" {  } {  } 0 0 "----------------------------------------------------------" 0 0 "0" 0 0 1493322341741 ""}
-{ "Info" "0" "" "----------------------------------------------------------" {  } {  } 0 0 "----------------------------------------------------------" 0 0 "0" 0 0 1493322341741 ""}
