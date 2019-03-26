@@ -1,0 +1,16 @@
+Fitter Status : Successful - Thu Apr 27 15:35:04 2017
+Quartus II 64-Bit Version : 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition
+Revision Name : Blink2
+Top-level Entity Name : Blink2
+Family : Cyclone II
+Device : EP2C5T144C8
+Timing Models : Final
+Total logic elements : 0 / 4,608 ( 0 % )
+    Total combinational functions : 0 / 4,608 ( 0 % )
+    Dedicated logic registers : 0 / 4,608 ( 0 % )
+Total registers : 0
+Total pins : 5 / 89 ( 6 % )
+Total virtual pins : 0
+Total memory bits : 0 / 119,808 ( 0 % )
+Embedded Multiplier 9-bit elements : 0 / 26 ( 0 % )
+Total PLLs : 0 / 2 ( 0 % )

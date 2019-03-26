@@ -1,0 +1,16 @@
+Fitter Status : Failed - Thu Jan 12 09:27:56 2017
+Quartus II 64-Bit Version : 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition
+Revision Name : wb_cyclone_cpu68
+Top-level Entity Name : wb_cyclone_cpu68
+Family : Cyclone II
+Device : EP2C5T144C8
+Timing Models : Final
+Total logic elements : 1,564 / 4,608 ( 34 % )
+    Total combinational functions : 1,492 / 4,608 ( 32 % )
+    Dedicated logic registers : 414 / 4,608 ( 9 % )
+Total registers : 414
+Total pins : 164 / 89 ( 184 % )
+Total virtual pins : 0
+Total memory bits : 17,408 / 119,808 ( 15 % )
+Embedded Multiplier 9-bit elements : 0 / 26 ( 0 % )
+Total PLLs : 0 / 2 ( 0 % )

@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<LOG_ROOT>
+	<PROJECT NAME="wb_cyclone_cpu68">
+		<CBX_INST_ENTRY INSTANCE_NAME="|wb_cyclone_cpu68|wb_lpm_ram:bram|LPM_RAM_DQ:\gen:0:ram|altram:sram|altsyncram:ram_block" CBX_FILE_NAME="altsyncram_lk71.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|wb_cyclone_cpu68|wb_lpm_rom:rom|LPM_ROM:rom0|altrom:srom|altsyncram:rom_block" CBX_FILE_NAME="altsyncram_la01.tdf"/>
+	</PROJECT>
+</LOG_ROOT>
