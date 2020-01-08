@@ -4,4 +4,4 @@
 * Our [http://land-boards.com/blwiki/index.php?title=EP2C5-DB EP2C5-DB Board]
 ** [https://github.com/douggilliland/MultiComp Multi-Comp Project]
 
-<img src="http://land-boards.com/blwiki/images/2/2f/EP2CS-DB-170-X4-CCA-720px.jpg"></a>
+<img src="http://land-boards.com/blwiki/images/d/d9/EP2C5-DB_RevX6_720px-rot.png"></a>
