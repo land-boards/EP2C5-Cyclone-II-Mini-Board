@@ -1,3 +1,7 @@
+<a href="https://www.tindie.com/products/land_boards/programmable-system-on-a-chip-for-the-raspberry-pi/?pt=ac_prod_search" >
+<img src="http://land-boards.com/tindie/tindie-larges-v2.png" alt="Tindie Logo">
+</img></a> 
+
 == EP2C5-Cyclone-II-Mini-Board ==
 
 * FPGA files for the [http://land-boards.com/blwiki/index.php?title=Cyclone_II_EP2C5_Mini_Dev_Board EP2C5 Cyclone II Mini Board].
